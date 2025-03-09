@@ -2,6 +2,8 @@ import React from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
+import Homepage from "@/comps/homepage/home"
+
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
 
@@ -11,7 +13,9 @@ function PageContent() {
     // );
 
     return (
-        <div className="bg-[#343434] w-full h-full">Home Page</div>
+        <div className="bg-[#343434] w-full h-full">
+            <Homepage/>
+        </div>
         // <>
         //     {canRead && (
         //         <div className="fadeIn-animation">
