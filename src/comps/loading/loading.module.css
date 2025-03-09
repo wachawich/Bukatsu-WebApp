@@ -1,0 +1,5 @@
+body.no-interaction {
+    pointer-events: none; /* Prevents clicking and dragging */
+    user-select: none;    /* Prevents text selection */
+    background-color: black;
+}
