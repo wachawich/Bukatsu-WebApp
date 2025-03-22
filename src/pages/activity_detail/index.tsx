@@ -2,7 +2,7 @@ import React from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import Homepage from "@/comps/homepage/home"
+import ActivityDetail from "@/comps/activityDetail/activityDetail"
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -14,7 +14,7 @@ function PageContent() {
 
     return (
         <div className="bg-[#343434] w-full h-full pt-14">
-            <Homepage/>
+            <ActivityDetail/>
         </div>
         // <>
         //     {canRead && (
@@ -27,7 +27,7 @@ function PageContent() {
 }
 
 
-export default function Home() {
+export default function ActivityDetails() {
     return (
         <>
             <LayoutShell>

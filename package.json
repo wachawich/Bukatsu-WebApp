@@ -17,10 +17,12 @@
     "@mantine/notifications": "^7.17.1",
     "@tabler/icons-react": "^3.31.0",
     "dayjs": "^1.11.13",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.1.7",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
