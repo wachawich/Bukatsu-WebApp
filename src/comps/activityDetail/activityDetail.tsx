@@ -2,7 +2,7 @@ import React from 'react'
 
 function ActivityDetail() {
   return (
-    <div>activityDetailsasdad as</div>
+    <div>activityDetailsasdad as asdasdasdasdasddfawda</div>
   )
 }
 
