@@ -7,25 +7,14 @@ import {
     IconAlignJustified,
     IconSearch,
 } from "@tabler/icons-react";
-import {
-    ThemeIcon,
-    UnstyledButton,
-    Group,
-    Text,
-    Divider,
-    useMantineTheme,
-    Avatar,
-    ActionIcon,
-    Image,
-} from "@mantine/core";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 // import { useTranslation } from "next-i18next";
-import { useLocalStorage, useMediaQuery } from "@mantine/hooks";
 import { IconFaceId } from "@tabler/icons-react";
 //import jwt from "jsonwebtoken";
 //import useCheckTokenFlags from "@/hooks/useCheckTokenFlag";
 import Link from "next/link.js";
+import { useMediaQuery } from "@/comps/public/useMediaQuery"
 
 interface MainLinkProps {
     label: string;
@@ -73,58 +62,42 @@ function ProvideLink({ label, route }: MainLinkProps) {
     const router = useRouter();
     const pathname = usePathname();
     const isLargerThanSms = useMediaQuery("(min-width: 768px)");
-
-    function changeRoute() {
-        const oldpath = pathname;
-        const newRoute = "/" + route;
-
-        if (oldpath === newRoute) {
-            router.reload();
-        } else {
-            router.push(`/${route}`, undefined, { shallow: true });
-        }
-    }
-
+  
+    const changeRoute = () => {
+      const newRoute = "/" + route;
+      if (pathname === newRoute) {
+        router.reload();
+      } else {
+        router.push(newRoute, undefined, { shallow: true });
+      }
+    };
+  
     return (
-        <UnstyledButton
-            onClick={changeRoute}
-            style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "12px",
-                borderRadius: "4px",
-                color: "#000",
-                zIndex: isLargerThanSms ? "0" : "50",
-                position: "relative",
-                width: isLargerThanSms ? "auto" : "100%", // ทำให้เต็ม width บนมือถือ
-                height: isLargerThanSms ? "auto" : "50px", // กำหนดความสูงในมือถือ
-                fontSize: isLargerThanSms ? "1rem" : "1.2rem", // ทำตัวใหญ่ขึ้น
-                fontWeight: isLargerThanSms ? "normal" : "bold", // เพิ่ม font-weight
-                backgroundColor: isLargerThanSms ? "transparent" : "transparent", // มี bg hover
-                transition: "background-color 0.1s",
-            }}
-            className={`relative ${!isLargerThanSms ? "hover:bg-gray-900" : ""}`}
-        >
-            <div className="text-black text-sm font-semibold">{label}</div>
-        </UnstyledButton>
+      <button
+        onClick={changeRoute}
+        className={`relative text-black ${!isLargerThanSms ? "hover:bg-gray-900 w-full h-[50px]" : ""}`}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "12px",
+          borderRadius: "4px",
+          fontSize: isLargerThanSms ? "1rem" : "1.2rem",
+          fontWeight: isLargerThanSms ? "normal" : "bold",
+          backgroundColor: "transparent",
+          transition: "background-color 0.1s",
+          cursor: "pointer",
+        }}
+      >
+        <div className="text-sm font-semibold">{label}</div>
+      </button>
     );
-}
+  }
 
 
 export function MainLinks() {
     // const { t } = useTranslation();
     const router = useRouter();
-    const [token, setToken] = useLocalStorage({
-        key: "authToken",
-        defaultValue: "",
-    });
-    const [pageFlag, setPageFlag] = useState<any>({});
-
-    const [profileImage, setProfileImage] = useState<string>("");
-
-    const [hasToken, setHasToken] = useState(false);
-    const [viewManageFlag, setViewManageFlag] = useState<boolean>(false);
 
     const data: MainLinkProps[] = [];
 
@@ -255,7 +228,7 @@ export function MainLinks() {
                             padding: "5px 20px",
                             borderRadius: "10px",
                             border: "1px solid #ccc",
-                            right : isLargerThanSm ? '-10' : '0'
+                            right: isLargerThanSm ? '-10' : '0'
                         }}
                     />
                 </div>
@@ -269,7 +242,7 @@ export function MainLinks() {
                 {!isLargerThanSm && (
                     <IconSearch className="mr-2 border rounded-md p-1 w-full h-full" />
                 )}
-
+{/* 
                 <Image
                     src="/saveee.png"
                     alt="profile"
@@ -280,7 +253,7 @@ export function MainLinks() {
                         borderRadius: "50%",
                         marginLeft: isLargerThanSm ? '10px' : '0'
                     }}
-                />
+                /> */}
 
 
                 {/* <ActionIcon>

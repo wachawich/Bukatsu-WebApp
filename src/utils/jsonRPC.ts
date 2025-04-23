@@ -2,7 +2,7 @@
 import { basePath } from "./api/apiENV";
 import { v4 as uuidv4 } from "uuid";
 import { getProviders, getSession } from "next-auth/react";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 
 // ก๊อปมา อย่างเชื่อ ต้องแก้
 
@@ -103,19 +103,21 @@ export const getADToken = async () => {
 // };
 
 
-export const fetchJSONRPC = async (url: string, method: string, params: {}) => {
+export const fetchJSONRPC = async (method: string, params: {}) => {
 
     const option = { timeout: 300000 };
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), option.timeout);
 
-    const token = localStorage.getItem("authToken");
+    const urls = process.env.BACKEND_PATH
+    // const id = setTimeout(() => controller.abort(), option.timeout);
 
-    const response = await fetch(`${url}/api/${method}`, {
+    // const token = localStorage.getItem("authToken");
+
+    const response = await fetch(`${urls}/api/${method}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+        //   Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ method, params }),
         signal: controller.signal,

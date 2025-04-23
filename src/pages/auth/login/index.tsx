@@ -2,9 +2,9 @@ import React, {useEffect, useState} from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import Homepage from "@/comps/homepage/home"
+import LoginPage from "@/comps/auth/login/loginPage"
 
-import { getUser } from "@/utils/api/userData"
+// import { getUser } from "@/utils/api/userData"
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -15,8 +15,8 @@ function PageContent() {
     // );
 
     return (
-        <div className="bg-[#343434] w-full h-full pt-14">
-            <Homepage/>
+        <div className="bg-[#343434] w-full h-full">
+            <LoginPage/>
         </div>
         // <>
         //     {canRead && (
@@ -29,12 +29,10 @@ function PageContent() {
 }
 
 
-export default function Home() {
+export default function Login() {
     return (
         <>
-            <LayoutShell>
-                <PageContent></PageContent>
-            </LayoutShell>
+            <PageContent></PageContent>
         </>
     );
 }
