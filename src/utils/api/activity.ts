@@ -15,41 +15,40 @@ export interface ActivityField {
     remark?: string;
     create_by?: string;
     location_id?: number;
+    location_name?: string;
+    location_type?: string;
+    flag_valid?: boolean;
+    activity_type?: any;
+    subject?: any;
 }
 
 export const getActivity = async (input: ActivityField) => {
     const {
         activity_id = "",
         title = "",
-        description = "",
         create_date = "",
         start_date = "",
         end_date = "",
         status = "",
-        contact = "",
-        user_count = "",
-        price = "",
-        user_property = "",
-        remark = "",
         create_by = "",
         location_id = "",
+        location_name = "",
+        location_type = "",
+        flag_valid = "",
     } = input;
 
     const data = await fetchDataApi("POST", "activity.get", {
         activity_id,
         title,
-        description,
         create_date,
         start_date,
         end_date,
         status,
-        contact,
-        user_count,
-        price,
-        user_property,
-        remark,
         create_by,
         location_id,
+        location_name,
+        location_type,
+        flag_valid,
     });
 
     return data;
@@ -58,7 +57,6 @@ export const getActivity = async (input: ActivityField) => {
 
 export const createActivity = async (input: ActivityField) => {
     const {
-        activity_id = "",
         title = "",
         description = "",
         create_date = "",
@@ -72,10 +70,11 @@ export const createActivity = async (input: ActivityField) => {
         remark = "",
         create_by = "",
         location_id = "",
+        activity_type = "",
+        subject = "",
     } = input;
 
     const data = await fetchDataApi("POST", "create_activity.post", {
-        activity_id,
         title,
         description,
         create_date,
@@ -89,6 +88,8 @@ export const createActivity = async (input: ActivityField) => {
         remark,
         create_by,
         location_id,
+        activity_type,
+        subject,
     });
 
     return data;
