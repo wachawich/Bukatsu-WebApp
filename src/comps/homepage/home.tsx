@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { getUser, postUser } from "@/utils/api/userData"
-
+import ActivityList from './activityList';
+import SubjectCard from './subjectCard';
 function Homepage() {
   const [sima, setSima] = useState<any>(null);
 
@@ -27,7 +28,13 @@ function Homepage() {
   // }, []);
 
   return (
-    <div className='text-[#ffffff] mt-20'> homeeeeeeeeeeee</div>
+    <div className='bg-white'> 
+    
+    <SubjectCard />
+    <ActivityList/>
+
+
+    </div>
   )
 }
 

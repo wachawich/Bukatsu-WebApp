@@ -15,6 +15,7 @@ export interface ActivityField {
     remark?: string;
     create_by?: string;
     location_id?: number;
+    flag_valid?: boolean;
 }
 
 export const getActivity = async (input: ActivityField) => {
@@ -33,6 +34,7 @@ export const getActivity = async (input: ActivityField) => {
         remark = "",
         create_by = "",
         location_id = "",
+        flag_valid = "",
     } = input;
 
     const data = await fetchDataApi("POST", "activity.get", {
@@ -50,6 +52,7 @@ export const getActivity = async (input: ActivityField) => {
         remark,
         create_by,
         location_id,
+        flag_valid,
     });
 
     return data;
