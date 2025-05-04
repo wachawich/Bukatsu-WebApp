@@ -99,7 +99,9 @@ export const createActivity = async (input: ActivityField) => {
 export interface ActivityTypeField {
     activity_type_id?: number;
     activity_type_name?: string;
+    activity_type_description? : string;
     show?: boolean;
+    flag_valid?: boolean;
 }
 
 export const getActivityType = async (input: ActivityTypeField) => {
@@ -113,6 +115,41 @@ export const getActivityType = async (input: ActivityTypeField) => {
         activity_type_id,
         activity_type_name,
         show,
+    });
+
+    return data;
+};
+
+export const createActivityType = async (input: ActivityTypeField) => {
+    const {
+        activity_type_name = "",
+        activity_type_description = "",
+    } = input;
+
+    const data = await fetchDataApi("POST", "activity_type.create", {
+        activity_type_name,
+        activity_type_description,
+    });
+
+    return data;
+};
+
+
+export const updateActivityType = async (input: ActivityTypeField) => {
+    const {
+        activity_type_id = "",
+        activity_type_name = "",
+        activity_type_description = "",
+        show = "",
+        flag_valid = "",
+    } = input;
+
+    const data = await fetchDataApi("POST", "activity_type.update", {
+        activity_type_id,
+        activity_type_name,
+        activity_type_description,
+        show,
+        flag_valid,
     });
 
     return data;
