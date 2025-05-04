@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react'
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
 import RegisterPage from "@/comps/auth/register/registerPage"
+import { NotificationProvider } from "@/comps/noti/notiComp";
 
 // import { getUser } from "@/utils/api/userData"
 
@@ -30,9 +31,10 @@ function PageContent() {
 
 
 export default function Register() {
+    
     return (
-        <>
+        <NotificationProvider>
             <PageContent></PageContent>
-        </>
+        </NotificationProvider>
     );
 }

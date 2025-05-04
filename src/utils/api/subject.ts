@@ -7,6 +7,7 @@ export interface SubjectField {
   subject_id?: number;
   subject_name?: string;
   show? : boolean
+  flag_valid? : boolean;
 }
 
 export const getSubject = async (input: SubjectField) => {
@@ -14,6 +15,7 @@ export const getSubject = async (input: SubjectField) => {
   const {
     subject_id = "",
     subject_name = "",
+    flag_valid = "",
     show = ""
   } = input;
 
@@ -21,6 +23,7 @@ export const getSubject = async (input: SubjectField) => {
     subject_id: subject_id,
     subject_name: subject_name,
     show : show,
+    flag_valid : flag_valid
   });
 
   return data;

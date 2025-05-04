@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
 import LoginPage from "@/comps/auth/login/loginPage"
+import { NotificationProvider } from "@/comps/noti/notiComp";
 
 // import { getUser } from "@/utils/api/userData"
 
@@ -16,7 +17,7 @@ function PageContent() {
 
     return (
         <div className="bg-[#343434] w-full h-full">
-            <LoginPage/>
+            <LoginPage />
         </div>
         // <>
         //     {canRead && (
@@ -31,8 +32,8 @@ function PageContent() {
 
 export default function Login() {
     return (
-        <>
+        <NotificationProvider>
             <PageContent></PageContent>
-        </>
+        </NotificationProvider>
     );
 }

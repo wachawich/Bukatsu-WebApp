@@ -70,7 +70,7 @@ export const sendOTP = async (input: UserField) => {
 
     const data = await fetchDataApi(`POST`, "otp.send", {
         email,
-    });
+    }, "otp");
 
     return data;
 };
@@ -86,7 +86,7 @@ export const verifyOTP = async (input: UserField) => {
     const data = await fetchDataApi(`POST`, "otp.verify", {
         email,
         otp,
-    });
+    }, "otp");
 
     return data;
 };
