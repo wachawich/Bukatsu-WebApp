@@ -1,7 +1,8 @@
+import HereMap from '@/comps/map/HereMap'
 import React, { useEffect, useState } from 'react'
-import { getUser } from "@/utils/api/userData"
 
-function Homepage() {
+
+function MainMap() {
   const [sima, setSima] = useState<any>(null);
 
   // useEffect(() => {
@@ -27,8 +28,10 @@ function Homepage() {
   // }, []);
 
   return (
-    <div className='text-[#ffffff] mt-20'> homeeeeeeeeeeee</div>
+    <div className='text-[#ffffff]'>
+        <HereMap/>
+    </div>
   )
 }
 
-export default Homepage
+export default MainMap
