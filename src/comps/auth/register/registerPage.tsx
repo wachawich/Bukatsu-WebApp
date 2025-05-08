@@ -12,20 +12,43 @@ import {
 import { useMediaQuery } from "@/comps/public/useMediaQuery"
 import RegistrationProgressBar from "@/comps/auth/register/progressBar"
 import SubjectCheckboxToggle from '@/comps/auth/register/subjectToggle';
+import ActivityCheckboxToggle from './activityTypeToggle';
 
 import { getRole } from "@/utils/api/roleData"
 import { getSubject } from "@/utils/api/subject"
+import { getActivityType } from "@/utils/api/activity"
+
+import { useNotification } from "@/comps/noti/notiComp"
+import { decodeToken } from "@/utils/auth/jwt";
+
+import { register } from '@/utils/auth/authAPI';
 
 interface Subject {
     subject_id: string;
     subject_name: string;
+    flag_valid: boolean;
     show: any;
 }
 
 interface SelectedSubject {
     subject_id: string;
     subject_name: string;
-    show: any
+    flag_valid: boolean;
+    show: any;
+}
+
+interface ActivityType {
+    activity_type_id: string;
+    activity_type_name: string;
+    show: boolean;
+    flag_valid: boolean;
+}
+
+interface SelectedActivityType {
+    activity_type_id: string;
+    activity_type_name: string;
+    show: boolean;
+    flag_valid: boolean;
 }
 
 
@@ -42,26 +65,110 @@ const RegisterPage = () => {
 
     const [userType, setUserType] = useState('');
 
-    const handleSubmit = () => {
+    const { showNotification } = useNotification();
+
+    useEffect(() => {
+        const user = decodeToken();
+        
+        if (user) {
+          router.push("/home");
+        }
+      }, []);
+
+    const handleSubmit = async () => {
         // Add authentication logic here
-        if (password !== confirmPassword) {
-            setError('รหัสผ่านไม่ตรงกัน');
-        } else {
-            setError('');
-            // ส่งข้อมูลต่อไป...
-            console.log('Password OK:', password);
+
+
+        if (pageRegis === 0) {
+
+            if (email === ""
+                && firstname === ""
+                && lastname === ""
+                && password === ""
+                && confirmPassword === ""
+            ) {
+                //setError('โปรดกรอกข้อมูลทั้งหมดให้ครบ!');
+                showNotification("Input Error", "กรุณากรอกข้อมูลให้ครบ", "error");
+            }
+            else {
+                if (password !== confirmPassword) {
+                    showNotification("Error", "รหัสผ่านไม่ตรงกัน", "error");
+                    //setError('รหัสผ่านไม่ตรงกัน');
+                } else if (password === confirmPassword) {
+                    setPageRegis(pageRegis + 1)
+                    // ส่งข้อมูลต่อไป...
+                    console.log('Password OK:', password);
+                }
+            }
+        }
+
+        if (pageRegis === 1) {
+            if (userType === '') {
+                showNotification("Input Error", "กรุณากรอกข้อมูลให้ครบ", "error");
+            } else {
+                console.log("userType", userType)
+                setPageRegis(pageRegis + 1)
+            }
         }
 
         if (pageRegis === 2) {
-            console.log('Login attempt:', { email, password });
+            const finalJson : any = await buildJsonForRegis()
+            console.log('finalJson:', finalJson);
+
+            const registerData = await register(finalJson)
+            console.log("registerData", registerData)
+
+            if (registerData.success){
+                showNotification("Register Success", "สมัครสมาชิกเสร็จสิ้น", "success");
+                router.push('/auth/login');
+            } else if (!registerData.success){
+                showNotification("Register Error", `${registerData.message}`, "error");
+            }
             // Redirect after successful login
             // router.push('/dashboard');
         }
     };
+
+
     const [optionsRole, setOptionsRole] = useState([]);
     const [optionsSubject, setOptionsSubject] = useState([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [activityType, setActivityType] = useState<ActivityType[]>([]);
     const [selectedSubjects, setSelectedSubjects] = useState<SelectedSubject[]>([]);
+    const [selectedActivityType, setSelectedActivityType] = useState<SelectedActivityType[]>([]);
+
+    function convertArrayToIndexedObject<T>(array: T[], key: keyof T): Record<string, number> {
+        const result: Record<string, number> = {};
+    
+        array.forEach((item, index) => {
+            const value = item[key];
+            result[index] = typeof value === 'string' || typeof value === 'number'
+                ? parseInt(value as string, 10)
+                : NaN;
+        });
+    
+        return result;
+    }
+    
+
+    const buildJsonForRegis = () => {
+        const subjectBlock = convertArrayToIndexedObject(selectedSubjects, 'subject_id');
+        const activityBlock = convertArrayToIndexedObject(selectedActivityType, 'activity_type_id');
+      
+        const finalJson = {
+          email: email,
+          user_first_name : firstname,
+          user_last_name : lastname,
+          password : password,
+          role_id : parseInt(userType),
+          subject : subjectBlock,
+          activity_type : activityBlock,
+        };
+      
+        console.log(finalJson); // หรือ return finalJson;
+        return finalJson;
+      };
+
 
     useEffect(() => {
         // สมมติว่า getRole() รับ role_id และส่งกลับข้อมูล
@@ -84,7 +191,7 @@ const RegisterPage = () => {
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
-                const subject = await getSubject({ show: true });
+                const subject = await getSubject({ flag_valid: true });
                 console.log("subject", subject.data);
                 setSubjects(subject.data);
             } catch (error) {
@@ -96,13 +203,36 @@ const RegisterPage = () => {
         fetchSubjects();
     }, []);
 
-    const handleSelectionChange = (newSelectedSubjects: SelectedSubject[]) => {
+    useEffect(() => {
+        const fetchActivityType = async () => {
+            try {
+                const activityType = await getActivityType({ show: true });
+                console.log("activityType", activityType.data);
+                setActivityType(activityType.data);
+            } catch (error) {
+                console.error("Error fetching subjects:", error);
+            } finally {
+            }
+        };
+
+        fetchActivityType();
+    }, []);
+
+    const handleSubjectSelectChange = (newSelectedSubjects: SelectedSubject[]) => {
         setSelectedSubjects(newSelectedSubjects);
         console.log("Selected subjects:", newSelectedSubjects);
-        
+
         // You can use selectedSubjects here or in another function
         // e.g., for form submission
-      };
+    };
+
+    const handleActivityTypeSelectChange = (newSelectedActivityType: SelectedActivityType[]) => {
+        setSelectedActivityType(newSelectedActivityType);
+        console.log("Selected Activity type :", newSelectedActivityType);
+
+        // You can use selectedSubjects here or in another function
+        // e.g., for form submission
+    };
 
     const isLargerThanSm = useMediaQuery("(min-width: 821px)");
 
@@ -179,7 +309,7 @@ const RegisterPage = () => {
                     flex flex-col w-full max-w-xl p-8 rounded-lg h-full justify-between
                     ${isLargerThanSm ? 'mr-[18%]' : 'mr-0'}
                 `}>
-                    <h1 className="text-2xl font-bold text-center mb-8 text-[#000000]">Register</h1>
+                    <h1 className="text-2xl font-bold text-center mb-5 text-[#000000]">Register</h1>
 
                     <form className='h-[70%]'>
                         {pageRegis === 0 ? (
@@ -200,7 +330,7 @@ const RegisterPage = () => {
                                             placeholder="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                                             required
                                         />
                                     </div>
@@ -222,7 +352,7 @@ const RegisterPage = () => {
                                             placeholder="ชื่อจริง"
                                             value={firstname}
                                             onChange={(e) => setFirstname(e.target.value)}
-                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                                             required
                                         />
                                     </div>
@@ -243,7 +373,7 @@ const RegisterPage = () => {
                                             placeholder="นามสกุล"
                                             value={lastname}
                                             onChange={(e) => setLastname(e.target.value)}
-                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                                             required
                                         />
                                     </div>
@@ -267,7 +397,7 @@ const RegisterPage = () => {
                                             placeholder="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                                             required
                                         />
                                     </div>
@@ -289,7 +419,7 @@ const RegisterPage = () => {
                                             placeholder="confirm password"
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                                            className="pl-10 block w-full border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                                             required
                                         />
                                     </div>
@@ -321,22 +451,23 @@ const RegisterPage = () => {
                             </>
                         ) : (
                             <>
-                                <SubjectCheckboxToggle
-                                    subjects={subjects}
-                                    onSelectionChange={handleSelectionChange}
-                                />
+                                <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '1rem' }} className=''>
+                                    <h3 className='text-black text-sm'>วิชาที่ชอบ</h3>
+                                    <SubjectCheckboxToggle
+                                        subjects={subjects}
+                                        onSelectionChange={handleSubjectSelectChange}
+                                    />
+                                </div>
 
-                                {/* {selectedSubjects.length > 0 && (
-                                    <div className="mt-6">
-                                        <h3 className="text-lg font-medium mb-2">Selected Subjects ({selectedSubjects.length})</h3>
-                                        <ul className="list-disc pl-5">
-                                            {selectedSubjects.map(subject => (
-                                                <li key={subject.subject_id}>{subject.subject_name}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )} */}
+                                <div style={{ maxHeight: '400px', overflowY: 'auto' }} className=''>
+                                    <h3 className='text-black text-sm'>กิจกรรมที่สนใจ</h3>
+                                    <ActivityCheckboxToggle
+                                        activities={activityType}
+                                        onSelectionChange={handleActivityTypeSelectChange}
+                                    />
+                                </div>
                             </>
+
                         )}
 
                     </form>
@@ -356,6 +487,9 @@ const RegisterPage = () => {
                                 <button
                                     type="submit"
                                     className="w-[48%] bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    onClick={() => {
+                                        handleSubmit()
+                                    }}
                                 >
                                     Register
                                 </button>
@@ -374,7 +508,9 @@ const RegisterPage = () => {
                             <button
                                 type="submit"
                                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                onClick={() => setPageRegis(pageRegis + 1)}
+                                onClick={() => {
+                                    handleSubmit()
+                                }}
                             >
                                 Continue
                             </button>
@@ -397,7 +533,9 @@ const RegisterPage = () => {
                                 </button>
                                 <button
                                     className="w-[48%] bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    onClick={() => setPageRegis(pageRegis + 1)}
+                                    onClick={() => {
+                                        handleSubmit()
+                                    }}
                                 >
                                     Continue
                                 </button>

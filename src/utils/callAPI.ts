@@ -6,17 +6,18 @@ interface ApiRequestOptions {
     method: RequestMethod;
     body?: any[];
     from: string;
+    route? : string;
 }
 
-export async function fetchDataApi(method: string, from: string, body: {}): Promise<any> {
-    // const urls = process.env.BACKEND_PATH;
+export async function fetchDataApi(method: string, from: string, body: {}, route: string = "api"): Promise<any> {
+    const urls = process.env.BACKEND_PATH || "http://localhost:8080";
 
-    // if (!urls) {
-    //     throw new Error('BACKEND_PATH environment variable is not set');
-    // }
+    if (!urls) {
+        throw new Error('BACKEND_PATH environment variable is not set');
+    }
 
     try {
-        const response = await fetch(`http://localhost:8080/api/${from}`, {
+        const response = await fetch(`${urls}/${route}/${from}`, {
             method,
             headers: {
                 'Content-Type': 'application/json',
