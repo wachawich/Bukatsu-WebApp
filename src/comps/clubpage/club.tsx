@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import ClubPage from './clubpage';
+import ClubPage from './ClubListPage';
 
 function Clubpage() {
   const [sima, setSima] = useState<any>(null);
@@ -28,7 +28,7 @@ function Clubpage() {
 
   return (
     <div>    
-      <div className='text-[#ffffff] mt-20'> kuy</div>
+      <div className='text-[#ffffff] text-4xl '> kuy</div>
       <ClubPage />
       </div>
 

@@ -1,38 +1,36 @@
-import React, { useEffect, useState } from 'react'
-import Clubdetailcard from './clubdetailcard';
+import React, { useEffect, useState } from 'react';
+import ClubDetailCard from './ClubDetailCard';
+import { fetchDataApi } from '@/utils/callAPI';
+import {ClubItem, getClub, ClubdetailProps } from '@/utils/api/club';
 
-function Clubdetail() {
-  const [sima, setSima] = useState<any>(null);
 
-  // useEffect(() => {
-  //   const interval = setInterval(async () => {
-  //     try {
-  //       console.log("siam")
+const Clubdetail: React.FC<ClubdetailProps> = ({ clubId }) => {
+  const [clubData, setClubData] = useState<ClubItem | null>(null);
 
-  //       const getuserFeild: any = {
-  //         user_sys_id: 0
-  //       }
-  //       console.log("getuserFeild", getuserFeild)
+  useEffect(() => {
+    const fetchClub = async () => {
+      try {
+        const response = await getClub(clubId);  
+        setClubData(response.data[0] as ClubItem);
+      } catch (error) {
+        console.error('Error fetching club:', error);
+      }
+    };
 
-  //       const user = await postUser(getuserFeild);
-  //       console.log("user", user)
-  //       // setSima(user);
-  //     } catch (error) {
-  //       console.error('Error fetching user:', error);
-  //     }
-  //   }, 5000); // 1000ms = 1 วินาที
+    if (clubId) {
+      fetchClub();
+    }
+  }, [clubId]);
 
-  //   // Cleanup เมื่อ component ถูก unmount
-  //   return () => clearInterval(interval);
-  // }, []);
+  if (!clubData) {
+    return <div className="text-white p-10">กำลังโหลดข้อมูลชมรม...</div>;
+  }
 
   return (
-    <div>    
-      <div className='text-[#ffffff] mt-20 text-6xl'> kuy</div>
-        <Clubdetailcard />
-      </div>
+    <div className="mt-20 text-black">
+      <ClubDetailCard club={clubData} />
+    </div>
+  );
+};
 
-  )
-}
-
-export default Clubdetail
+export default Clubdetail;
