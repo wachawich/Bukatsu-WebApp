@@ -1,10 +1,8 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import CreateActivity from "@/comps/createActivity/create_activity"
-
-import { getUser } from "@/utils/api/userData"
+import Allpost from "@/comps/allpost/allpostPage"
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -16,7 +14,7 @@ function PageContent() {
 
     return (
         <div className="bg-[#343434] w-full h-full pt-14">
-            <CreateActivity/>
+            <Allpost/>
         </div>
         // <>
         //     {canRead && (
@@ -29,7 +27,7 @@ function PageContent() {
 }
 
 
-export default function create_activity() {
+export default function ActivityDetails() {
     return (
         <>
             <LayoutShell>

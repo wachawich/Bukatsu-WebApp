@@ -2,9 +2,9 @@ import React, {useEffect, useState} from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import CreateActivity from "@/comps/createActivity/create_activity"
+import Myactivity from "@/comps/myactivity/activityPage"
 
-import { getUser } from "@/utils/api/userData"
+
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -16,7 +16,7 @@ function PageContent() {
 
     return (
         <div className="bg-[#343434] w-full h-full pt-14">
-            <CreateActivity/>
+            <Myactivity/>
         </div>
         // <>
         //     {canRead && (
