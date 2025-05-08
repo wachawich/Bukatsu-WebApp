@@ -274,6 +274,7 @@ const LoginPage = () => {
               verifyOTP={verifyOTP}
               resendOTP={sendOTP}
               token={token}
+              rememberMe={rememberMe}
               onVerificationComplete={(verified) => {
                 if (verified) {
                   showNotification("Verified", "OTP is correct", "success");
