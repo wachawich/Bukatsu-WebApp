@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import Myactivity from "@/comps/myactivity/activityPage"
+import Myactivity from "@/comps/myactivity/myactivity"
 
 
 

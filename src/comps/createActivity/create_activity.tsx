@@ -1,361 +1,42 @@
-// import React, { useState, useEffect } from "react";
-// import { createActivity, ActivityField } from "@/utils/api/activity";
-// import { getLocation, LocationField } from "@/utils/api/location";
 
-// const Createactivity = () => {
-//   const [locations, setLocations] = useState<LocationField[]>([]);
-
-//   const [formData, setFormData] = useState<ActivityField>({
-//     title: "",
-//     description: "",
-//     start_date: "",
-//     end_date: "",
-//     status: "",
-//     contact: "",
-//     user_count: 0,
-//     price: 0,
-//     user_property: "",
-//     remark: "",
-//     create_by: "",
-//     location_id: 0,
-//   });
-
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const locationRes = await getLocation({ flag_valid: true }); // ✅ เพิ่มเงื่อนไขให้ fetch location ที่ valid เท่านั้น
-
-//         if (locationRes?.success && Array.isArray(locationRes.data)) {
-//           setLocations(locationRes.data);
-//         } else {
-//           console.warn("Location fetch returned invalid data:", locationRes);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching locations:", error);
-//       }
-//     };
-
-//     fetchData();
-//   }, []);
-
-//   const handleChange = (
-//     e: React.ChangeEvent<
-//       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-//     >
-//   ) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: ["user_count", "price", "location_id"].includes(name)
-//         ? Number(value)
-//         : value,
-//     }));
-//   };
-
-//   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0];
-//     if (file) {
-//       const fakeUrl = URL.createObjectURL(file);
-//       // สามารถเพิ่ม logic upload file จริงได้ที่นี่
-//     }
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-
-//     const { title, start_date, end_date, status, create_by, location_id, user_count } = formData;
-
-//     if (!title || !start_date || !end_date || !status || !create_by || !location_id || !user_count) {
-//       alert("Please fill in all required fields.");
-//       return;
-//     }
-
-//     try {
-//       setIsLoading(true);
-//       const response = await createActivity(formData);
-//       if (response.success) {
-//         alert("Activity created successfully!");
-//         setFormData({
-//           title: "",
-//           description: "",
-//           start_date: "",
-//           end_date: "",
-//           status: "",
-//           contact: "",
-//           user_count: 0,
-//           price: 0,
-//           user_property: "",
-//           remark: "",
-//           create_by: "",
-//           location_id: 0,
-//         });
-//       } else {
-//         alert("An error occurred while creating the activity.");
-//       }
-//     } catch (error) {
-//       console.error("Error:", error);
-//       alert("An error occurred while submitting the form.");
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex justify-center items-center bg-[#f9f9ff] px-4 md:px-32 py-10">
-//       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6 md:p-12">
-//         <h1 className="text-3xl font-semibold text-center mb-8 font-cherry">Activity Information</h1>
-//         <form onSubmit={handleSubmit}>
-//           {/* Section 1: Basic Info */}
-//           <section className="mb-8">
-//             <div className="grid gap-4">
-//               <div>
-//                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-//                   Activity Title
-//                 </label>
-//                 <input
-//                   type="text"
-//                   id="title"
-//                   name="title"
-//                   value={formData.title}
-//                   onChange={handleChange}
-//                   placeholder="Enter activity title"
-//                   className="rounded-full p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                   required
-//                 />
-//               </div>
-
-//               <div>
-//                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-//                   Description
-//                 </label>
-//                 <textarea
-//                   id="description"
-//                   name="description"
-//                   value={formData.description}
-//                   onChange={handleChange}
-//                   placeholder="Describe your activity"
-//                   className="h-24 rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                 />
-//               </div>
-
-//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                 <div>
-//                   <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-1">
-//                     Start Date
-//                   </label>
-//                   <input
-//                     type="date"
-//                     id="start_date"
-//                     name="start_date"
-//                     value={formData.start_date}
-//                     onChange={handleChange}
-//                     className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                     required
-//                   />
-//                 </div>
-//                 <div>
-//                   <label htmlFor="end_date" className="block text-sm font-medium text-gray-700 mb-1">
-//                     End Date
-//                   </label>
-//                   <input
-//                     type="date"
-//                     id="end_date"
-//                     name="end_date"
-//                     value={formData.end_date}
-//                     onChange={handleChange}
-//                     className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                     required
-//                   />
-//                 </div>
-//               </div>
-//             </div>
-//           </section>
-
-//           {/* Section 2: Participants and Price */}
-//           <section className="mb-8">
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//               <div>
-//                 <label htmlFor="user_count" className="block text-sm font-medium text-gray-700 mb-1">
-//                   Number of Participants
-//                 </label>
-//                 <input
-//                   type="number"
-//                   id="user_count"
-//                   name="user_count"
-//                   value={formData.user_count}
-//                   onChange={handleChange}
-//                   placeholder="Max number of participants"
-//                   min="0"
-//                   className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                   required
-//                 />
-//               </div>
-//               <div>
-//                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-//                   Price
-//                 </label>
-//                 <input
-//                   type="number"
-//                   id="price"
-//                   name="price"
-//                   value={formData.price}
-//                   onChange={handleChange}
-//                   placeholder="Cost to participate (0 for free)"
-//                   min="0"
-//                   className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                 />
-//               </div>
-//             </div>
-
-//             <div className="mt-4">
-//               <label htmlFor="user_property" className="block text-sm font-medium text-gray-700 mb-1">
-//                 Participant Requirements
-//               </label>
-//               <input
-//                 id="user_property"
-//                 name="user_property"
-//                 value={formData.user_property}
-//                 onChange={handleChange}
-//                 className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//               />
-//             </div>
-//           </section>
-
-//           {/* Section 3: Location and Contact */}
-//           <section className="mb-8">
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//               <div>
-//                 <label htmlFor="location_id" className="block text-sm font-medium text-gray-700 mb-1">
-//                   Location
-//                 </label>
-//                 <select
-//                   id="location_id"
-//                   name="location_id"
-//                   value={formData.location_id}
-//                   onChange={handleChange}
-//                   required
-//                   className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                 >
-//                   <option value="">-- Select Location --</option>
-//                   {locations.map((loc) => (
-//                     <option key={loc.location_id} value={loc.location_id}>
-//                       {loc.location_name}
-//                     </option>
-//                   ))}
-//                 </select>
-//               </div>
-
-//               <div>
-//                 <label htmlFor="contact" className="block text-sm font-medium text-gray-700 mb-1">
-//                   Contact Information
-//                 </label>
-//                 <input
-//                   type="text"
-//                   id="contact"
-//                   name="contact"
-//                   value={formData.contact}
-//                   onChange={handleChange}
-//                   placeholder="Phone number or email"
-//                   className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                 />
-//               </div>
-//             </div>
-//           </section>
-
-//           {/* Section 4: Creator Info & Remarks */}
-//           <section className="mb-8">
-//             <div>
-//               <label htmlFor="create_by" className="block text-sm font-medium text-gray-700 mb-1">
-//                 Created By
-//               </label>
-//               <input
-//                 type="text"
-//                 id="create_by"
-//                 name="create_by"
-//                 value={formData.create_by}
-//                 onChange={handleChange}
-//                 placeholder="Your name or organization"
-//                 className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                 required
-//               />
-//             </div>
-
-//             <div className="mt-4">
-//               <label htmlFor="remark" className="block text-sm font-medium text-gray-700 mb-1">
-//                 Remarks
-//               </label>
-//               <textarea
-//                 id="remark"
-//                 name="remark"
-//                 value={formData.remark}
-//                 onChange={handleChange}
-//                 placeholder="Any additional notes or remarks"
-//                 className="h-16 rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//               />
-//             </div>
-
-//             <div className="mt-4">
-//               <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-//                 Status
-//               </label>
-//               <select
-//                 id="status"
-//                 name="status"
-//                 value={formData.status}
-//                 onChange={handleChange}
-//                 className="rounded-2xl p-2 w-full pl-5 border-2 border-orange-300 focus:outline-none focus:border-orange-500"
-//                 required
-//               >
-//                 <option value="">-- Select Status --</option>
-//                 <option value="active">Active</option>
-//                 <option value="closed">Closed</option>
-//               </select>
-//             </div>
-//           </section>
-
-//           {/* Section 5: Upload */}
-//           <section className="mb-8">
-//             <h2 className="text-xl font-semibold mb-4">Upload Image</h2>
-//             <input
-//               type="file"
-//               accept="image/*"
-//               onChange={handleImageChange}
-//               className="block w-full text-sm text-gray-500
-//                 file:mr-4 file:py-2 file:px-4
-//                 file:rounded-full file:border-0
-//                 file:text-sm file:font-semibold
-//                 file:bg-orange-50 file:text-orange-700
-//                 hover:file:bg-orange-100"
-//             />
-//           </section>
-
-//           <div className="text-center mt-8">
-//             <button
-//               type="submit"
-//               className="px-8 py-3 bg-orange-300 font-bold text-xl hover:bg-orange-600 text-white rounded-full transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50"
-//               disabled={isLoading}
-//             >
-//               {isLoading ? "Creating..." : "Create Activity"}
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Createactivity;
 import React, { useState, useEffect } from 'react';
 import { createActivity, getActivityType, ActivityField, ActivityTypeField } from '@/utils/api/activity';
-import{SubjectField,getSubject} from "@/utils/api/subject";
-// Subject interface
-interface SubjectField {
-  subject_id?: number;
-  subject_name?: string;
-  show?: boolean;
+import { fetchDataApi } from '@/utils/callAPI';
+
+// Define interfaces for subjects and locations
+interface Subject {
+  subject_id: string | number;
+  subject_name: string;
 }
+
+interface Location {
+  location_id: number;
+  location_name: string;
+  location_type?: string;
+}
+
+// API functions for fetching subjects and locations
+export const getSubjects = async () => {
+  try {
+    const data = await fetchDataApi("POST", "subject.get", {});
+    console.log("Subjects data:", data);
+    return data.success && data.data ? data.data : [];
+  } catch (error) {
+    console.error("Error fetching subjects:", error);
+    return [];
+  }
+};
+
+export const getLocations = async () => {
+  try {
+    const data = await fetchDataApi("POST", "location.get", {});
+    console.log("Locations data:", data);
+    return data.success && data.data ? data.data : [];
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    return [];
+  }
+};
 
 const CreateActivityPage = () => {
   // Form state
@@ -369,14 +50,19 @@ const CreateActivityPage = () => {
   const [price, setPrice] = useState<number | ''>('');
   const [userProperty, setUserProperty] = useState('');
   const [remark, setRemark] = useState('');
-  const [createBy, setCreateBy] = useState<number | ''>('');
+  const [createBy, setCreateBy] = useState('');
   const [locationId, setLocationId] = useState<number | ''>('');
   
-  // Activity types and subjects selection
+  // Activity types, subjects, and locations
   const [activityTypes, setActivityTypes] = useState<ActivityTypeField[]>([]);
-  const [subjects, setSubjects] = useState<SubjectField[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [selectedActivityTypes, setSelectedActivityTypes] = useState<number[]>([]);
-  const [selectedSubjects, setSelectedSubjects] = useState<number[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<(string | number)[]>([]);
+  
+  // Loading states
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [loadingLocations, setLoadingLocations] = useState(true);
   
   // Form validation
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -384,33 +70,42 @@ const CreateActivityPage = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // Fetch activity types on component mount
+  // Fetch data on component mount
   useEffect(() => {
-    const fetchActivityTypes = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getActivityType({});
-        if (response && response.success && response.data) {
-          setActivityTypes(response.data);
+        // Fetch activity types
+        const activityTypeResponse = await getActivityType({});
+        if (activityTypeResponse && activityTypeResponse.success && activityTypeResponse.data) {
+          console.log("Activity types:", activityTypeResponse.data);
+          setActivityTypes(activityTypeResponse.data);
         }
+
+        // Fetch subjects
+        setLoadingSubjects(true);
+        const subjectsResponse = await getSubjects();
+        console.log("Subjects response:", subjectsResponse);
+        if (Array.isArray(subjectsResponse)) {
+          setSubjects(subjectsResponse);
+        }
+        setLoadingSubjects(false);
+
+        // Fetch locations
+        setLoadingLocations(true);
+        const locationsResponse = await getLocations();
+        console.log("Locations response:", locationsResponse);
+        if (Array.isArray(locationsResponse)) {
+          setLocations(locationsResponse);
+        }
+        setLoadingLocations(false);
       } catch (error) {
-        console.error('Error fetching activity types:', error);
+        console.error('Error fetching data:', error);
+        setLoadingSubjects(false);
+        setLoadingLocations(false);
       }
     };
 
-    // Fetch subjects (mock implementation - replace with actual API)
-    const fetchSubjects = async () => {
-      try {
-        const response = await getSubject();
-        if (response && response.success && response.data) {
-          setSubjects(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching subjects:', error);
-      }
-    };
-
-    fetchActivityTypes();
-    fetchSubjects();
+    fetchData();
   }, []);
 
   // Validate form fields
@@ -451,7 +146,7 @@ const CreateActivityPage = () => {
         });
         
         // Prepare subject object
-        const subject: Record<string, number> = {};
+        const subject: Record<string, number | string> = {};
         selectedSubjects.forEach((subjectId, index) => {
           subject[index.toString()] = subjectId;
         });
@@ -464,14 +159,14 @@ const CreateActivityPage = () => {
           end_date: endDate,
           status,
           contact,
-          user_count: userCount as number,
-          price: price as number,
+          user_count: Number(userCount), // ensure number
+          price: Number(price) || 0,     // fallback เป็น 0
           user_property: userProperty,
           remark,
-          create_by: createBy as string,
-          location_id: locationId as number,
+          create_by: createBy,
+          location_id: Number(locationId), // ensure number
           activity_type: activityType,
-          subject
+          subject,
         };
         
         const response = await createActivity(activityField);
@@ -521,7 +216,7 @@ const CreateActivityPage = () => {
   };
 
   // Handle subject selection
-  const handleSubjectChange = (subjectId: number) => {
+  const handleSubjectChange = (subjectId: string | number) => {
     setSelectedSubjects(prev => {
       if (prev.includes(subjectId)) {
         return prev.filter(id => id !== subjectId);
@@ -623,15 +318,15 @@ const CreateActivityPage = () => {
             {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
           </div>
           
-          {/* ผู้สร้างกิจกรรม */}
+         
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              ผู้สร้างกิจกรรม (ID) <span className="text-red-500">*</span>
+            ผู้สร้างกิจกรรม (ID) <span className="text-red-500">*</span>
             </label>
             <input
-              type="number"
+              type="text"
               value={createBy}
-              onChange={(e) => setCreateBy(parseInt(e.target.value) || '')}
+              onChange={(e) => setCreateBy(e.target.value)}
               className={`w-full p-2 border rounded-md ${errors.createBy ? 'border-red-500' : 'border-gray-300'}`}
               placeholder="กรอก ID ผู้สร้าง"
             />
@@ -655,15 +350,26 @@ const CreateActivityPage = () => {
           {/* สถานที่จัดกิจกรรม */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              สถานที่จัดกิจกรรม (ID) <span className="text-red-500">*</span>
+              สถานที่จัดกิจกรรม <span className="text-red-500">*</span>
             </label>
-            <input
-              type="number"
+            <select
               value={locationId}
               onChange={(e) => setLocationId(parseInt(e.target.value) || '')}
               className={`w-full p-2 border rounded-md ${errors.locationId ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="กรอก ID สถานที่"
-            />
+            >
+              <option value="">เลือกสถานที่</option>
+              {loadingLocations ? (
+                <option value="" disabled>กำลังโหลดข้อมูลสถานที่...</option>
+              ) : locations && locations.length > 0 ? (
+                locations.map((location) => (
+                  <option key={location.location_id} value={location.location_id}>
+                    {location.location_name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>ไม่พบข้อมูลสถานที่</option>
+              )}
+            </select>
             {errors.locationId && <p className="text-red-500 text-xs mt-1">{errors.locationId}</p>}
           </div>
           
@@ -678,107 +384,101 @@ const CreateActivityPage = () => {
               onChange={(e) => setUserCount(parseInt(e.target.value) || '')}
               className={`w-full p-2 border rounded-md ${errors.userCount ? 'border-red-500' : 'border-gray-300'}`}
               placeholder="กรอกจำนวนผู้เข้าร่วม"
-              min="1"
             />
             {errors.userCount && <p className="text-red-500 text-xs mt-1">{errors.userCount}</p>}
           </div>
-          
+
           {/* ราคา */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              ราคา
+              ราคา (บาท)
             </label>
             <input
               type="number"
               value={price}
-              onChange={(e) => setPrice(parseInt(e.target.value) || '')}
+              onChange={(e) => setPrice(parseFloat(e.target.value) || '')}
               className="w-full p-2 border border-gray-300 rounded-md"
-              placeholder="กรอกราคา"
-              min="0"
+              placeholder="เช่น 0 หรือ 100"
             />
           </div>
-          
+
           {/* คุณสมบัติผู้เข้าร่วม */}
-          <div>
+          <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               คุณสมบัติผู้เข้าร่วม
             </label>
-            <input
-              type="text"
+            <textarea
               value={userProperty}
               onChange={(e) => setUserProperty(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
-              placeholder="เช่น นักเรียน, นักศึกษา"
+              rows={2}
+              placeholder="ระบุคุณสมบัติผู้เข้าร่วมกิจกรรม"
             />
           </div>
-          
+
           {/* หมายเหตุ */}
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              หมายเหตุ
+              หมายเหตุเพิ่มเติม
             </label>
             <textarea
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
               rows={2}
-              placeholder="หมายเหตุเพิ่มเติม"
+              placeholder="หมายเหตุอื่น ๆ"
             />
           </div>
-          
+
           {/* ประเภทกิจกรรม */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               ประเภทกิจกรรม
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {activityTypes.filter(type => type.show).map((type) => (
-                <div key={type.activity_type_id} className="flex items-center">
+            <div className="grid grid-cols-4 gap-2">
+              {activityTypes.map((type) => (
+                <label key={type.activity_type_id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`type-${type.activity_type_id}`}
-                    checked={selectedActivityTypes.includes(type.activity_type_id as number)}
-                    onChange={() => handleActivityTypeChange(type.activity_type_id as number)}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    checked={selectedActivityTypes.includes(type.activity_type_id)}
+                    onChange={() => handleActivityTypeChange(type.activity_type_id)}
                   />
-                  <label htmlFor={`type-${type.activity_type_id}`} className="ml-2 text-sm text-gray-700">
-                    {type.activity_type_name}
-                  </label>
-                </div>
+                  <span>{type.activity_type_name}</span>
+                </label>
               ))}
             </div>
           </div>
-          
-          {/* หัวข้อที่เกี่ยวข้อง */}
+
+          {/* รายวิชาที่เกี่ยวข้อง */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              หัวข้อที่เกี่ยวข้อง
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              รายวิชาที่เกี่ยวข้อง
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {subjects.filter(sub => sub.show).map((subject) => (
-                <div key={subject.subject_id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`subject-${subject.subject_id}`}
-                    checked={selectedSubjects.includes(subject.subject_id as number)}
-                    onChange={() => handleSubjectChange(subject.subject_id as number)}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                  <label htmlFor={`subject-${subject.subject_id}`} className="ml-2 text-sm text-gray-700">
-                    {subject.subject_name}
+            <div className="grid grid-cols-4 gap-2">
+              {loadingSubjects ? (
+                <span className="text-sm text-gray-500">กำลังโหลดข้อมูลวิชา...</span>
+              ) : (
+                subjects.map((subject) => (
+                  <label key={subject.subject_id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedSubjects.includes(subject.subject_id)}
+                      onChange={() => handleSubjectChange(subject.subject_id)}
+                    />
+                    <span>{subject.subject_name}</span>
                   </label>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
-        
+
         {/* Submit Button */}
-        <div className="mt-8 flex justify-center">
+        <div className="col-span-2 text-center">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            className={`w-full py-2 px-4 text-white rounded-md ${isSubmitting ? 'bg-gray-500' : 'bg-blue-600'}`}
           >
             {isSubmitting ? 'กำลังสร้างกิจกรรม...' : 'สร้างกิจกรรม'}
           </button>
