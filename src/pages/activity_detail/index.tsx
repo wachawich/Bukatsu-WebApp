@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link';
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
@@ -11,10 +12,15 @@ function PageContent() {
     //     [{ flag: "read", onFlagUpdated: setCanRead }],
     //     "check_in"
     // );
+    const activityId = 10;
 
     return (
         <div className="bg-[#343434] w-full h-full pt-14">
             <ActivityDetail/>
+            <h1>รายการกิจกรรม</h1>
+            <Link href={`/activity_detail/${activityId}`}>
+  ดูรายละเอียดกิจกรรม
+</Link>
         </div>
         // <>
         //     {canRead && (

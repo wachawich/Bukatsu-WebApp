@@ -17,6 +17,8 @@ export async function fetchDataApi(method: string, from: string, body: {}, route
     }
 
     try {
+        console.log(`console.log(${urls}/${route}/${from})`, `${urls}/${route}/${from}`);
+
         const response = await fetch(`${urls}/${route}/${from}`, {
             method,
             headers: {
