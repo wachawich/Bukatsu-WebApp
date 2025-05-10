@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import ActivityDetail from "@/comps/activityDetail/activityDetail"
+import ActivityDetail from "@/comps/activityDetail/activity_detailPage"
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -12,15 +12,12 @@ function PageContent() {
     //     [{ flag: "read", onFlagUpdated: setCanRead }],
     //     "check_in"
     // );
-    const activityId = 10;
+
 
     return (
-        <div className="bg-[#343434] w-full h-full pt-14">
+        <div className="bg-[#343434] w-full min-h-screen pt-14 overflow-auto">
             <ActivityDetail/>
-            <h1>รายการกิจกรรม</h1>
-            <Link href={`/activity_detail/${activityId}`}>
-  ดูรายละเอียดกิจกรรม
-</Link>
+          
         </div>
         // <>
         //     {canRead && (
