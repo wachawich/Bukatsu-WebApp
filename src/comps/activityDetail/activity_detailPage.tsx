@@ -6,13 +6,20 @@ import Heart from "./Heart";
 import { IconCameraPin } from '@tabler/icons-react'; 
 import { useRouter } from "next/router";
 
+type ExtendedActivityField = ActivityField & {
+  activity_type_data?: {
+    activity_type_id: number;
+    activity_type_name: string;
+  }[];
+  activity_subject_data?: {
+    subject_id: number;
+    subject_name: string;
+  }[];
+};
 
 type UserField = {
 user_sys_id?: number;
   username?: string;
-  user_first_name?: string;
-  user_last_name?: string;
-  [key: string]: any;
 };
 
 const getUser = async (input: UserField) => {
@@ -33,7 +40,7 @@ const getUser = async (input: UserField) => {
 
 
 const ActivityDetail: React.FC = () => {
-  const [activity, setActivity] = useState<ActivityField | null>(null);
+  const [activity, setActivity] = useState<ExtendedActivityField | null>(null);
   const [creator, setCreator] = useState<UserField | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -88,7 +95,7 @@ const ActivityDetail: React.FC = () => {
           })}
           {creator && (
             <span className="ml-2 text-gray-700">
-              โดย {creator.username ?? `${creator.user_first_name ?? ""} ${creator.user_last_name ?? ""}`}
+              โดย {creator.username }
             </span>
           )}
         </p>
@@ -145,12 +152,12 @@ const ActivityDetail: React.FC = () => {
 
 
           </div>
-          {(activity.activity_type_data?.length > 0 || activity.activity_subject_data?.length > 0) && (
+          {((activity.activity_type_data?.length ?? 0) > 0 || (activity.activity_type_data?.length ?? 0)  > 0) && (
             <div className="mb-6">
               <div className="flex flex-wrap gap-2 justify-center items-center">
                 {activity.activity_type_data?.map((type: any) => (
                   <span
-                    key={`type-${type.activity_type_id}`}
+                    key={`type-${type.activity_type_id}`} 
                     className="bg-orange-200 text-orange-600 px-3 py-1 text-sm"
                   >
                     {type.activity_type_name}
