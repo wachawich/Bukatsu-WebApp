@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { getUser, postUser } from "@/utils/api/userData"
+import { getUser } from "@/utils/api/userData"
 
 function Homepage() {
   const [sima, setSima] = useState<any>(null);
