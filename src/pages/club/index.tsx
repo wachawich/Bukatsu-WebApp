@@ -16,7 +16,7 @@ function PageContent() {
     // );
 
     return (
-        <div className="bg-[#343434] w-full overflow-x-hidden h-full pt-14">
+        <div className="bg-white text-black w-full overflow-x-hidden h-full pt-14">
             <Clubpage/>
         </div>
         // <>
