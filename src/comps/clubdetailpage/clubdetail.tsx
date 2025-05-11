@@ -23,7 +23,7 @@ const Clubdetail: React.FC<ClubdetailProps> = ({ clubId }) => {
   }, [clubId]);
 
   if (!clubData) {
-    return <div className="text-white p-10">กำลังโหลดข้อมูลชมรม...</div>;
+    return <div className="text-black p-10">กำลังโหลดข้อมูลชมรม...</div>;
   }
 
   return (
