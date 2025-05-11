@@ -2,57 +2,56 @@ import React from 'react';
 import { useState,useEffect } from "react";
 import { useRouter } from 'next/router'
 import { Users, Globe, X, Upload, ImagePlus } from "lucide-react";
-import {Props} from '@/utils/api/club';
-import { sendDataApi,fetchDataApi } from '@/utils/callAPI'; // ปรับ path ตามโครงสร้างโปรเจกต์ของคุณ
 import ImageUploadModal from './ImageUploadModal';
+import { getClubImages,uploadClubImage,uploadPRImage,FormattedClubImage } from '@/utils/api/club';
+import PRUploadModal from './PrUpload';
 
-interface ClubImage {
-  club_id: string;
-  image_link: string;
-}
 
-interface FormattedClubImage {
-  id: string;
-  link: string;
-}
 const ClubDetailCard = ({ club }:any) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showPRUploadModal, setPRShowUploadModal] = useState(false);
   const [clubItems, setClubItems] = useState<FormattedClubImage[]>([]);
   const router = useRouter()
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const formatted = await getClubImages();
+        setClubItems(formatted);
+      } catch (error) {
+        console.error('Failed to fetch clubs:', error);
+      }
+    };
+  
+    fetchImages();
+  }, []);
 
-    useEffect(() => {
-      const fetchClubs = async () => {
-        try {
-          const response = await fetchDataApi('POST', 'clublink.get', {}); 
-          const data = response.data as ClubImage[];
-  
-          const formatted = data.map((item) => ({
-            id: item.club_id,
-            link: item.image_link,
-          }));
-          setClubItems(formatted);
-        } catch (error) {
-          console.error('Failed to fetch clubs:', error);
-        }
-      };
-  
-      fetchClubs();
-    }, []);
-  // Handle file upload
+  // Handle file uploa
   const handleUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("id", club.club_id); 
-  
-    sendDataApi('PUT', 'club.put', formData)
-    .then(data => {
-      console.log("Upload success:", data);
-      router.reload()
-    })
-    .catch(error => {
-      console.error("Upload error:", error);
-    });
+    try {
+      const data = await uploadClubImage(file, club.club_id);
+      console.log('Upload success:', data);
+      router.reload();
+    } catch (error) {
+      console.error('Upload error:', error);
+    }
   };
+
+  const handleUploadPR = async (files: { banner: File | null; square: File | null }) => {
+    try {
+      if (files.banner) {
+        await uploadPRImage(files.banner, club.club_id, 'banner');
+      }
+      if (files.square) {
+        await uploadPRImage(files.square, club.club_id, 'square');
+      }
+      console.log("Upload complete");
+      // router.reload();
+    } catch (error) {
+      console.error('Upload failed:', error);
+    }
+  };
+  
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       <div className="border border-gray-200 rounded-lg overflow-hidden p-6 mb-6">
@@ -61,14 +60,14 @@ const ClubDetailCard = ({ club }:any) => {
           {/* PR image or fallback */}
                 <div
         className="cursor-pointer bg-fuchsia-500 text-black min-h-48 md:w-96 flex items-center justify-center rounded-lg overflow-hidden"
-        onClick={() => console.log('Clicked!')}
+        onClick={() => setPRShowUploadModal(true)}
       >
         {club?.club_image_path ? (
-          <img
-            src={club.club_image_path}
-            alt={club?.club_name || 'Club Image'}
-            className="w-full h-full object-cover"
-          />
+        <img
+          src={(club.club_image_path)?.banner} 
+          alt={club?.club_name || 'Club Image'}
+          className="w-full h-full object-cover"
+        />
         ) : (
           <span className="text-2xl font-bold">PR</span>
         )}
@@ -144,6 +143,11 @@ const ClubDetailCard = ({ club }:any) => {
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         onUpload={handleUpload}
+      />
+      <PRUploadModal
+        isOpen={showPRUploadModal}
+        onClose={() => setPRShowUploadModal(false)}
+        onUpload={handleUploadPR}
       />
     </div>
   );
