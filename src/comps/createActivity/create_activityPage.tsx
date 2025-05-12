@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { createActivity, getActivityType, ActivityField, ActivityTypeField } from '@/utils/api/activity';
-import { fetchDataApi } from '@/utils/callAPI';
+// import { fetchDataApi } from '@/utils/callAPI';
 import CheckboxGroup from './checkbox';
 import { decodeToken } from '@/utils/auth/jwt';
 import { getSubject } from "@/utils/api/subject";
 import { getLocation } from "@/utils/api/location";
 import Testform from "@/comps/testForm/testForm";
 import { FormSchema } from "@/lib/types";
+import ImageUpload from './imageUpload';
 
-// Define interfaces for subjects and locations
 interface Subject {
   subject_id: string | number;
   subject_name: string;
@@ -40,7 +40,7 @@ export const getLocations = async () => {
 };
 
 const CreateActivityPage = () => {
-  // Form state
+ 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -54,21 +54,20 @@ const CreateActivityPage = () => {
   const [locationId, setLocationId] = useState<number | ''>('');
   // const [createBy, setCreateBy] = useState('');
   
-  // Activity types, subjects, and locations
+  
   const [activityTypes, setActivityTypes] = useState<ActivityTypeField[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedActivityTypes, setSelectedActivityTypes] = useState<number[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<(string | number)[]>([]);
   
-  // Loading states
+
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingLocations, setLoadingLocations] = useState(true);
   
-  // Form builder state
   const [formJson, setFormJson] = useState<FormSchema | null>(null);
-
-  // Form validation
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+ 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -76,9 +75,7 @@ const CreateActivityPage = () => {
 
   const userSysId = decodeToken()?.user_sys_id;
 
-  // Build the payload for activity creation
   const buildJsonForActivity = () => {
-    // Convert arrays to objects as required by API
     const activityType: Record<string, any> = {};
     selectedActivityTypes.forEach((typeId, index) => {
       activityType[index.toString()] = typeId;
@@ -88,25 +85,25 @@ const CreateActivityPage = () => {
     selectedSubjects.forEach((subjectId, index) => {
       subject[index.toString()] = subjectId;
     });
-    
-    // สร้าง payload โดยแน่ใจว่าไม่มีค่า NULL ที่จะทำให้เกิด SQL error
+  
     const payload = {
       title,
-      description: description || '', // ให้เป็น empty string แทน null
+      description: description || '', 
       start_date: startDate,
       end_date: endDate,
       status,
-      contact: contact || '', // ให้เป็น empty string แทน null
-      user_count: userCount !== '' ? Number(userCount) : 0, // ให้เป็น 0 แทน null
-      price: price !== '' ? Number(price) : 0, // ให้เป็น 0 แทน null
-      user_property: userProperty || '', // ให้เป็น empty string แทน null
-      remark: remark || '', // ให้เป็น empty string แทน null
+      contact: contact || '', 
+      user_count: userCount !== '' ? Number(userCount) : 0, 
+      price: price !== '' ? Number(price) : 0, 
+      user_property: userProperty || '', 
+      remark: remark || '', 
       create_by: userSysId,
+      activity_json_form: formJson,
       // create_by: createBy,
-      location_id: Number(locationId) || 0, // ให้เป็น 0 แทน null
+      location_id: Number(locationId) || 0, 
     };
 
-    // เพิ่มข้อมูลเฉพาะเมื่อมีค่า
+    
     if (Object.keys(activityType).length > 0) {
       payload.activity_type = activityType;
     }
@@ -122,23 +119,20 @@ const CreateActivityPage = () => {
     return payload;
   };
 
-  // Fetch data on component mount
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch activity types
         const activityTypeResponse = await getActivityType({});
         if (activityTypeResponse?.success && activityTypeResponse.data) {
           setActivityTypes(activityTypeResponse.data);
         }
 
-        // Fetch subjects
         setLoadingSubjects(true);
         const subjectsResponse = await getSubjects();
         setSubjects(subjectsResponse);
         setLoadingSubjects(false);
 
-        // Fetch locations
         setLoadingLocations(true);
         const locationsResponse = await getLocations();
         setLocations(locationsResponse);
@@ -153,7 +147,7 @@ const CreateActivityPage = () => {
     fetchData();
   }, []);
 
-  // Validate form fields
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -173,7 +167,7 @@ const CreateActivityPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Reset form after successful submission
+
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -192,12 +186,11 @@ const CreateActivityPage = () => {
     setFormJson(null); 
   };
 
-  // เมื่อ Testform มีการ submit
+
   const handleFormSubmit = (formData: FormSchema) => {
     setFormJson(formData);
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submission attempted');
@@ -213,7 +206,7 @@ const CreateActivityPage = () => {
       console.log('Form validated, submitting...');
 
       try {
-        // สร้าง payload โดยใช้ buildJsonForActivity
+        
         const payload = buildJsonForActivity();
         console.log('Sending payload:', payload);
         
@@ -241,14 +234,14 @@ const CreateActivityPage = () => {
     }
   };
 
-  // Handle activity type selection
+
   const handleActivityTypeChange = (typeId: number) => {
     setSelectedActivityTypes(prev => 
       prev.includes(typeId) ? prev.filter(id => id !== typeId) : [...prev, typeId]
     );
   };
 
-  // Handle subject selection
+
   const handleSubjectChange = (subjectId: string | number) => {
     setSelectedSubjects(prev => 
       prev.includes(subjectId) ? prev.filter(id => id !== subjectId) : [...prev, subjectId]
@@ -260,8 +253,16 @@ const CreateActivityPage = () => {
     setFormJson(newFormJson);
   };
 
+   const handleImageUpload = (url: string) => {
+    setImageUrl(url);
+  };
+
+  const handleDeleteImage = () => {
+    setImageUrl(null);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md ">
       {submitSuccess && (
         <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
           สร้างกิจกรรมสำเร็จแล้ว!
@@ -273,12 +274,23 @@ const CreateActivityPage = () => {
           {submitError}
         </div>
       )}
-      
-      {/* ส่วนของฟอร์มหลัก */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <p>Create activity</p>
-        {/* ชื่อกิจกรรม */}
-        <div className="col-span-2">
+
+      <p className='text-xl font-bold text-center'>Create activity</p>
+       
+   
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 max-w-4xl mx-auto px-4 py-6">
+        
+        <div>
+          <ImageUpload onImageUpload={handleImageUpload} onDeleteImage={handleDeleteImage} />
+
+        {imageUrl && (
+          <div className="mt-4">
+            <p className="text-sm text-gray-500">รูปภาพที่เลือก: {imageUrl}</p>
+          </div>
+        )}
+        </div>
+
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             ชื่อกิจกรรม <span className="text-red-500">*</span>
           </label>
@@ -290,10 +302,8 @@ const CreateActivityPage = () => {
             placeholder="กรอกชื่อกิจกรรม"
           />
           {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-        </div>
         
-        {/* รายละเอียด */}
-        <div className="col-span-2">
+        <div className='mt-6'>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             รายละเอียด
           </label>
@@ -305,8 +315,9 @@ const CreateActivityPage = () => {
             placeholder="กรอกรายละเอียดกิจกรรม"
           />
         </div>
-        
-        {/* วันที่เริ่มกิจกรรม */}
+        </div>
+    
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             วันที่เริ่มกิจกรรม <span className="text-red-500">*</span>
@@ -319,8 +330,7 @@ const CreateActivityPage = () => {
           />
           {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>}
         </div>
-        
-        {/* วันที่สิ้นสุดกิจกรรม */}
+  
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             วันที่สิ้นสุดกิจกรรม <span className="text-red-500">*</span>
@@ -333,8 +343,7 @@ const CreateActivityPage = () => {
           />
           {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
         </div>
-        
-        {/* สถานะ */}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             สถานะ <span className="text-red-500">*</span>
@@ -365,9 +374,7 @@ const CreateActivityPage = () => {
             {errors.createBy && <p className="text-red-500 text-xs mt-1">{errors.createBy}</p>}
           </div>  */}
 
-        
-        
-        {/* ช่องทางการติดต่อ */}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             ช่องทางการติดต่อ
@@ -380,8 +387,7 @@ const CreateActivityPage = () => {
             placeholder="เช่น เบอร์โทร, อีเมล"
           />
         </div>
-        
-        {/* สถานที่จัดกิจกรรม */}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             สถานที่จัดกิจกรรม <span className="text-red-500">*</span>
@@ -406,8 +412,7 @@ const CreateActivityPage = () => {
           </select>
           {errors.locationId && <p className="text-red-500 text-xs mt-1">{errors.locationId}</p>}
         </div>
-        
-        {/* จำนวนผู้เข้าร่วม */}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             จำนวนผู้เข้าร่วม <span className="text-red-500">*</span>
@@ -422,7 +427,6 @@ const CreateActivityPage = () => {
           {errors.userCount && <p className="text-red-500 text-xs mt-1">{errors.userCount}</p>}
         </div>
 
-        {/* ราคา */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             ราคา (บาท)
@@ -432,25 +436,24 @@ const CreateActivityPage = () => {
             value={price}
             onChange={(e) => setPrice(Number(e.target.value) || '')}
             className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="เช่น 0 หรือ 100"
+            // placeholder="เช่น 0 หรือ 100"
           />
         </div>
 
-        {/* คุณสมบัติผู้เข้าร่วม */}
-        <div className="col-span-2">
+        <div >
           <label className="block text-sm font-medium text-gray-700 mb-1">
             คุณสมบัติผู้เข้าร่วม
           </label>
-          <textarea
+          <input
+            type="text"
             value={userProperty}
             onChange={(e) => setUserProperty(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md"
-            rows={2}
             placeholder="ระบุคุณสมบัติผู้เข้าร่วมกิจกรรม"
           />
         </div>
 
-        {/* หมายเหตุ */}
+
         <div className="col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             หมายเหตุเพิ่มเติม
@@ -484,17 +487,16 @@ const CreateActivityPage = () => {
         />
       </div>
 
-      {/* แบบฟอร์มกิจกรรม - แยกออกมาจากฟอร์มหลัก */}
+    
       <div className="mt-6 mb-6">
         <h2 className="text-xl font-bold mb-2">แบบฟอร์มกิจกรรม</h2>
         <div id="dynamic-form-container">
-          {/* นำ TestForm มาใช้โดยไม่ต้องอยู่ภายใน form */}
           <Testform formJson={formJson} setFormJson={setFormJson} />
-{errors.formJson && <p className="text-red-500 text-xs mt-1">{errors.formJson}</p>}
+          {errors.formJson && <p className="text-red-500 text-xs mt-1">{errors.formJson}</p>}
         </div>
       </div>
 
-      {/* ปุ่มสร้างกิจกรรม - แยกออกมาเป็นการใช้ div onClick แทน form */}
+    
       <div className="mt-6 text-center">
         <button
           onClick={handleSubmit}
@@ -509,3 +511,4 @@ const CreateActivityPage = () => {
 };
 
 export default CreateActivityPage;
+

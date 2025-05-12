@@ -1,6 +1,5 @@
 import React from 'react';
 
-// ทำให้ interface ชัดเจนและตรงตามการใช้งาน
 interface CheckboxGroupProps<T> {
   items: T[];
   selectedItems: (string | number)[];
@@ -40,6 +39,7 @@ const CheckboxGroup = <T extends Record<string, any>>({
               <label key={itemId} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
+                  className="accent-orange-600"
                   checked={selectedItems.includes(itemId)}
                   onChange={() => onItemChange(itemId)}
                 />

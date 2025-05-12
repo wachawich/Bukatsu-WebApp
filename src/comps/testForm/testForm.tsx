@@ -36,7 +36,7 @@ export default function Testform({ formJson, setFormJson }: TestFormProps) {
             return;
         }
         console.log('Saved form JSON in Testform:', json);
-        setFormJson(json); // อัปเดต formJson ใน CreateActivityPage
+        setFormJson(json); 
         setIsOpen(false);
         alert('บันทึกฟอร์มสำเร็จ');
     };
@@ -61,7 +61,7 @@ export default function Testform({ formJson, setFormJson }: TestFormProps) {
             <h2 className="text-lg font-medium mb-4">สร้างฟอร์มสำหรับกิจกรรม</h2>
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                    className="bg-orange-600 text-white px-4 py-2 rounded"
                 >
                     {formJson ? 'Edit Form' : 'Open Form Builder'}
                 </button>
