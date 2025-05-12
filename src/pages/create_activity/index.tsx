@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import CreateActivity from "@/comps/createActivity/create_activity"
+import CreateActivity from "@/comps/createActivity/create_activityPage"
 
 import { getUser } from "@/utils/api/userData"
 
