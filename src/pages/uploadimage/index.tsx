@@ -57,7 +57,7 @@ export default function UploadPage() {
     setUploadSuccess(false);
 
     try {
-      const data = await uploadImage(selectedImage); 
+      const data = await uploadImage(selectedImage);
       console.log('Upload success:', data);
     setFileUrl(data.fileUrl);
     setIsUploading(false);
