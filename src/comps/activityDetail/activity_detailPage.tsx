@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Heart from "./Heart";
 import { IconCameraPin } from '@tabler/icons-react'; 
 import { useRouter } from "next/router";
+import { Dialog } from '@headlessui/react';
+import FormPreview from '@/comps/form/form-builder/form-preview';
 
 type ExtendedActivityField = ActivityField & {
   activity_type_data?: {
@@ -45,6 +47,10 @@ const ActivityDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { activity_id } = router.query;
+  
+  const [isFormOpen, setIsFormOpen] = useState(false); 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  
 
   useEffect(() => {
   const fetchActivity = async () => {
@@ -187,16 +193,50 @@ const ActivityDetail: React.FC = () => {
             <a>ค้นหาสถานที่</a>
           </button>
 
-          <a
-            href="#"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow transition"
-          >
-            สมัครเข้าร่วมกิจกรรม
-          </a>
-
+          {activity.activity_json_form && (
+              <button
+                onClick={() => setIsFormOpen(true)}
+                className={`px-4 py-2 rounded-md shadow transition text-white ${
+                  isSubmitted ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+                disabled={isSubmitted}
+              >
+                {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      
+      {/* <Dialog open={isFormOpen} onClose={() => setIsFormOpen(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded bg-white p-6">
+            <Dialog.Title className="text-xl font-bold mb-4">สมัครเข้าร่วมกิจกรรม</Dialog.Title>
+
+            {activity.activity_json_form && (
+              <FormPreview
+                form={activity.activity_json_form}
+                onSubmitSuccess={() => {
+                  setIsSubmitted(true); 
+                  setIsFormOpen(false); 
+                }}
+              />
+            )}
+
+            <div className="mt-4 text-right">
+              <button
+                onClick={() => setIsFormOpen(false)}
+                className="text-sm text-gray-600 hover:text-gray-800"
+              >
+                ปิด
+              </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+           */}
     </div>
   );
 };

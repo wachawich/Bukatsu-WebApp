@@ -5,10 +5,17 @@ import { DynamicForm } from '@/comps/form/form-display/dynamic-form';
 
 interface FormPreviewProps {
   form: FormSchema;
+   onSubmitSuccess?: () => void;
 }
 
-const FormPreview = ({ form }: FormPreviewProps) => {
+const FormPreview = ({ form, onSubmitSuccess }: FormPreviewProps) => {
   console.log('FormPreview received form:', form); // 👈 เพิ่มตรงนี้
+  const handleSubmit = (data: any) => {
+    console.log('Preview form data:', data);
+    if (onSubmitSuccess) {
+      onSubmitSuccess();
+    }
+  };
   
   return (
     <div className="border rounded-lg p-6 bg-card text-black">
@@ -19,10 +26,7 @@ const FormPreview = ({ form }: FormPreviewProps) => {
         )}
       </div>
       
-      <DynamicForm
-        form={form}
-        onSubmit={(data) => console.log('Preview form data:', data)}
-      />
+      <DynamicForm form={form} onSubmit={handleSubmit} />
     </div>
   );
 };
