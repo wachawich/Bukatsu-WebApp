@@ -149,7 +149,7 @@ export function DynamicForm({ form, onSubmit, isSubmitting = false }: DynamicFor
         
         <Button 
           type="submit" 
-          className="w-full md:w-auto bg-black text-[#ffffff]"
+          className="w-full md:w-auto bg-blue-500 text-[#ffffff]"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Submitting...' : 'Submit'}

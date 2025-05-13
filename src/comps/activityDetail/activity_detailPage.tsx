@@ -3,7 +3,7 @@ import { getActivity, ActivityField } from "@/utils/api/activity";
 import { fetchDataApi } from "@/utils/callAPI";
 import Image from 'next/image';
 import Heart from "./Heart";
-import { IconCameraPin } from '@tabler/icons-react'; 
+import { IconCameraPin, IconCalendar } from '@tabler/icons-react'; 
 import { useRouter } from "next/router";
 import { Dialog } from '@headlessui/react';
 import FormPreview from '@/comps/form/form-builder/form-preview';
@@ -17,6 +17,7 @@ type ExtendedActivityField = ActivityField & {
     subject_id: number;
     subject_name: string;
   }[];
+  image_url?: string;
 };
 
 type UserField = {
@@ -46,10 +47,11 @@ const ActivityDetail: React.FC = () => {
   const [creator, setCreator] = useState<UserField | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { activity_id } = router.query;
-  
-  const [isFormOpen, setIsFormOpen] = useState(false); 
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { activity_id, submitted } = router.query; 
+  const isSubmitted = submitted === "true"; 
+
+  // const [isFormOpen, setIsFormOpen] = useState(false); 
+  // const [isSubmitted, setIsSubmitted] = useState(false);
   
 
   useEffect(() => {
@@ -87,42 +89,47 @@ const ActivityDetail: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto font-sans ">
-      <div className="bg-white  rounded-xl shadow-lg overflow-hidden">
-      <div className="p-6 text-center">
-        <div className="mb-4">
+      <div className="bg-white  rounded-xl shadow-lg overflow-hidden p-4">
+      <div className="p-2 text-center">
+        <div >
+          <div className="flex justify-end ">
+            <Heart />
+          </div>
           <h1 className="text-2xl sm:text-4xl font-bold text-blue-900">{activity.title}</h1>
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">
+        <div className="flex items-center justify-center text-gray-500 text-sm gap-2">
+        <IconCalendar size={20} className="text-orange-500 mt-2 mb-4" />
+        <p className="text-sm text-gray-500 mt-2 mb-4">
           โพสต์เมื่อ {new Date(activity.create_date).toLocaleDateString("th-TH", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric"
           })}
           {creator && (
-            <span className="ml-2 text-gray-700">
+            <span className="ml-6 text-gray-700">
               โดย {creator.username }
             </span>
           )}
         </p>
+        </div>
       </div>
 
-
+          
         <Image 
-          src="/test.jpg" 
-          alt="test" 
+          src={activity.image_link?.banner || "/default-banner.jpg"} 
+          alt="Banner Image" 
           width={1000} 
-          height={1000} 
-          className="w-full h-[130%] rotate-0"
+          height={400} 
+          className="w-full h-auto rounded-3xl "
         />
+ 
+        <div className="p-4">
+         <p style={{ textIndent: "2rem" }} className="mb-2 p-7 text-base leading-relaxed">
+          {activity.description}
+        </p>
 
-        <div className="p-6 ">
-          <div className="flex justify-end mb-4">
-            <Heart />
-          </div>
-          <p className=" mb-6 text-base leading-relaxed">{activity.description}</p>
-
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-lg shadow-sm">
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-8 mb-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-semibold text-blue-800 mb-2">รายละเอียดกิจกรรม</h2>
             <ul className="list-disc ml-5 space-y-1 text-gray-700">
               <li><strong>จำนวนที่รับ:</strong> {activity.user_count ?? "ไม่ระบุ"}</li>
@@ -188,27 +195,34 @@ const ActivityDetail: React.FC = () => {
          
 
           <div className="flex flex-wrap justify-center items-center gap-4 ">
-          <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md  transition">
+          <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md  transition">
            <IconCameraPin size={20} />
             <a>ค้นหาสถานที่</a>
           </button>
 
           {activity.activity_json_form && (
-              <button
-                onClick={() => setIsFormOpen(true)}
-                className={`px-4 py-2 rounded-md shadow transition text-white ${
-                  isSubmitted ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-                disabled={isSubmitted}
-              >
-                {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
-              </button>
+              // <button
+              //   onClick={() => setIsFormOpen(true)}
+              //   className={`px-4 py-2 rounded-md shadow transition text-white ${
+              //     isSubmitted ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+              //   }`}
+              //   disabled={isSubmitted}
+              // >
+              //   {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
+              // </button>
+              <a 
+            href={`/activity_register?activity_id=${activity_id}`} 
+            className={`px-4 py-2 rounded-md shadow transition text-white ${
+                isSubmitted ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            }`}
+        >
+            {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
+        </a>
             )}
           </div>
         </div>
       </div>
 
-      
       {/* <Dialog open={isFormOpen} onClose={() => setIsFormOpen(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -226,17 +240,13 @@ const ActivityDetail: React.FC = () => {
             )}
 
             <div className="mt-4 text-right">
-              <button
-                onClick={() => setIsFormOpen(false)}
-                className="text-sm text-gray-600 hover:text-gray-800"
-              >
+              <button onClick={() => setIsFormOpen(false)} className="text-sm text-gray-600 hover:text-gray-800">
                 ปิด
               </button>
             </div>
           </Dialog.Panel>
         </div>
-      </Dialog>
-           */}
+      </Dialog> */}
     </div>
   );
 };
