@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { createActivity, getActivityType, ActivityField, ActivityTypeField } from '@/utils/api/activity';
-// import { fetchDataApi } from '@/utils/callAPI';
+import { createActivity, getActivityType, ActivityTypeField } from '@/utils/api/activity';
 import CheckboxGroup from './checkbox';
 import { decodeToken } from '@/utils/auth/jwt';
 import { getSubject } from "@/utils/api/subject";
 import { getLocation } from "@/utils/api/location";
 import Testform from "@/comps/testForm/testForm";
 import { FormSchema } from "@/lib/types";
-import ImageUpload from './imageUpload';
+import ImageUpload from "@/comps/Imageupload/uploadimage";
 
 interface Subject {
   subject_id: string | number;
@@ -52,9 +51,8 @@ const CreateActivityPage = () => {
   const [userProperty, setUserProperty] = useState('');
   const [remark, setRemark] = useState('');
   const [locationId, setLocationId] = useState<number | ''>('');
-  // const [createBy, setCreateBy] = useState('');
   
-  
+
   const [activityTypes, setActivityTypes] = useState<ActivityTypeField[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -66,8 +64,7 @@ const CreateActivityPage = () => {
   const [loadingLocations, setLoadingLocations] = useState(true);
   
   const [formJson, setFormJson] = useState<FormSchema | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
- 
+  const [imageJson, setImageJson] = useState<{ url: string } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -99,10 +96,10 @@ const CreateActivityPage = () => {
       remark: remark || '', 
       create_by: userSysId,
       activity_json_form: formJson,
-      // create_by: createBy,
+      image_link: imageJson || { square: '', banner: '' }, 
       location_id: Number(locationId) || 0, 
     };
-
+    console.log('Payload:', payload);
     
     if (Object.keys(activityType).length > 0) {
       payload.activity_type = activityType;
@@ -152,12 +149,15 @@ const CreateActivityPage = () => {
     const newErrors: Record<string, string> = {};
     
     if (!title) newErrors.title = 'กรุณาระบุชื่อกิจกรรม';
-    // if (!createBy) newErrors.createBy = 'กรุณาระบุผู้สร้างกิจกรรม';
     if (!startDate) newErrors.startDate = 'กรุณาระบุวันที่เริ่มกิจกรรม';
     if (!endDate) newErrors.endDate = 'กรุณาระบุวันที่สิ้นสุดกิจกรรม';
     if (!status) newErrors.status = 'กรุณาระบุสถานะกิจกรรม';
     if (!locationId) newErrors.locationId = 'กรุณาระบุสถานที่';
     if (!userCount) newErrors.userCount = 'กรุณาระบุจำนวนผู้เข้าร่วม';
+
+    if (!imageJson || (!imageJson.square && !imageJson.banner)) {
+        newErrors.image = 'กรุณาอัปโหลดรูปภาพ';
+    }
     
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
       newErrors.endDate = 'วันที่สิ้นสุดต้องมาหลังวันที่เริ่มกิจกรรม';
@@ -174,7 +174,6 @@ const CreateActivityPage = () => {
     setStartDate('');
     setEndDate('');
     setStatus('active');
-     // setCreateBy('');
     setContact('');
     setUserCount('');
     setPrice('');
@@ -184,6 +183,7 @@ const CreateActivityPage = () => {
     setSelectedActivityTypes([]);
     setSelectedSubjects([]);
     setFormJson(null); 
+    setImageJson(null);
   };
 
 
@@ -248,22 +248,33 @@ const CreateActivityPage = () => {
     );
   };
 
+  const handleImageUploaded = (imageData: { square: string; banner: string }) => {
+    setImageJson(imageData);
+};
+
+
+
   const handleFormJsonUpdate = (newFormJson: FormSchema) => {
     console.log('Updating form JSON:', newFormJson);
     setFormJson(newFormJson);
   };
 
-   const handleImageUpload = (url: string) => {
-    setImageUrl(url);
-  };
+//    const handleImageUpload = (url: string) => {
+//     setImageUrl(url);
+//   };
 
-  const handleDeleteImage = () => {
-    setImageUrl(null);
-  };
+//   const handleDeleteImage = () => {
+//     setImageUrl(null);
+//   };
+
+//   const handleUploadSuccess = (url: string) => {
+//   console.log("Uploaded file URL:", url);
+  
+// };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md ">
-      {submitSuccess && (
+      {/* {submitSuccess && (
         <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
           สร้างกิจกรรมสำเร็จแล้ว!
         </div>
@@ -273,25 +284,19 @@ const CreateActivityPage = () => {
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
           {submitError}
         </div>
-      )}
+      )} */}
 
-      <p className='text-xl font-bold text-center'>Create activity</p>
+      <p className=' text-3xl font-bold text-center mt-6'>Create activity</p>
        
    
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 max-w-4xl mx-auto px-4 py-6">
         
         <div>
-          <ImageUpload onImageUpload={handleImageUpload} onDeleteImage={handleDeleteImage} />
-
-        {imageUrl && (
-          <div className="mt-4">
-            <p className="text-sm text-gray-500">รูปภาพที่เลือก: {imageUrl}</p>
-          </div>
-        )}
+          <ImageUpload onImageUploaded={handleImageUploaded} />     
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className='w-full'>
+          <label className="block text-sm font-medium text-gray-700 mb-1 ">
             ชื่อกิจกรรม <span className="text-red-500">*</span>
           </label>
           <input
@@ -303,18 +308,18 @@ const CreateActivityPage = () => {
           />
           {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
         
-        <div className='mt-6'>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            รายละเอียด
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            rows={4}
-            placeholder="กรอกรายละเอียดกิจกรรม"
-          />
-        </div>
+          <div className='mt-8'>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              รายละเอียด
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              rows={9}
+              placeholder="กรอกรายละเอียดกิจกรรม"
+            />
+          </div>
         </div>
     
 
@@ -501,7 +506,7 @@ const CreateActivityPage = () => {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className={`w-full py-2 px-4 text-white rounded-md ${isSubmitting ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'}`}
+          className={`w-full py-2 px-4 text-white rounded-md ${isSubmitting ? 'bg-gray-500' : 'bg-orange-600 hover:bg-orange-700'}`}
         >
           {isSubmitting ? 'กำลังสร้างกิจกรรม...' : 'สร้างกิจกรรม'}
         </button>

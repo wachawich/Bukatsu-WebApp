@@ -1,4 +1,4 @@
-// app/forms/new/page.tsx
+
 'use client';
 
 import React, { useState } from 'react';
@@ -58,12 +58,12 @@ export default function Testform({ formJson, setFormJson }: TestFormProps) {
 
     return (
         <div className="p-6">
-            <h2 className="text-lg font-medium mb-4">สร้างฟอร์มสำหรับกิจกรรม</h2>
+            <h2 className="text-4sm font-medium mb-4">สร้างฟอร์มสำหรับกิจกรรม</h2>
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="bg-orange-600 text-white px-4 py-2 rounded"
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
                 >
-                    {formJson ? 'Edit Form' : 'Open Form Builder'}
+                    {formJson ? 'Edit Form' : 'Create Form '}
                 </button>
 
                 {formJson && (
