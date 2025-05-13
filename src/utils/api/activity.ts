@@ -259,3 +259,36 @@ export const updateActivityType = async (input: ActivityTypeField) => {
     return data;
 };
 
+export const getMyActivity = async (input: ActivityField) => {
+    const {
+        activity_id = "",
+        title = "",
+        create_date = "",
+        start_date = "",
+        end_date = "",
+        status = "",
+        create_by = "",
+        location_id = "",
+        location_name = "",
+        location_type = "",
+        flag_valid = "",
+        user_sys_id = "",
+    } = input;
+
+    const data = await fetchDataApi("POST", "my_activity.get", {
+        activity_id,
+        title,
+        create_date,
+        start_date,
+        end_date,
+        status,
+        create_by,
+        location_id,
+        location_name,
+        location_type,
+        flag_valid,
+        user_sys_id,
+    });
+
+    return data;
+};
