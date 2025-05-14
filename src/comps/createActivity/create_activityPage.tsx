@@ -206,7 +206,6 @@ const CreateActivityPage = () => {
       console.log('Form validated, submitting...');
 
       try {
-        
         const payload = buildJsonForActivity();
         console.log('Sending payload:', payload);
         
@@ -215,8 +214,16 @@ const CreateActivityPage = () => {
 
         if (response?.success) {
           setSubmitSuccess(true);
+
+          // 🔹 บันทึกกิจกรรมลง localStorage
+          const storedActivities = JSON.parse(localStorage.getItem("activities") || "[]");
+          storedActivities.push(payload);
+          localStorage.setItem("activities", JSON.stringify(storedActivities));
+
           resetForm();
           alert('สร้างกิจกรรมสำเร็จ');
+
+          router.push("/myac");
         } else {
           setSubmitError('เกิดข้อผิดพลาดในการสร้างกิจกรรม: ' + (response?.message || 'ไม่ทราบสาเหตุ'));
           alert('เกิดข้อผิดพลาด: ' + (response?.message || 'ไม่ทราบสาเหตุ'));
@@ -232,8 +239,7 @@ const CreateActivityPage = () => {
     } else {
       console.log('Form validation failed');
     }
-  };
-
+};
 
   const handleActivityTypeChange = (typeId: number) => {
     setSelectedActivityTypes(prev => 
@@ -273,7 +279,7 @@ const CreateActivityPage = () => {
 // };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md ">
+    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md ">
       {/* {submitSuccess && (
         <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
           สร้างกิจกรรมสำเร็จแล้ว!
@@ -286,230 +292,232 @@ const CreateActivityPage = () => {
         </div>
       )} */}
 
-      <p className=' text-3xl font-bold text-center mt-6'>Create activity</p>
-       
-   
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 max-w-4xl mx-auto px-4 py-6">
-        
-        <div>
-          <ImageUpload onImageUploaded={handleImageUploaded} />     
-        </div>
-
-        <div className='w-full'>
-          <label className="block text-sm font-medium text-gray-700 mb-1 ">
-            ชื่อกิจกรรม <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={`w-full p-2 border rounded-md ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="กรอกชื่อกิจกรรม"
-          />
-          {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-        
-          <div className='mt-8'>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              รายละเอียด
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              rows={9}
-              placeholder="กรอกรายละเอียดกิจกรรม"
-            />
+      <div className="text-3xl font-bold text-center bg-orange-500 text-white shadow-lg w-full px-10 py-8 rounded-tr-lg rounded-tl-lg">
+        <p className="mt-2">Create activity</p>
+      </div>
+      <div className='p-6'>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 max-w-4xl mx-auto px-4 py-6">
+          
+          <div>
+            <ImageUpload onImageUploaded={handleImageUploaded} />     
           </div>
-        </div>
-    
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            วันที่เริ่มกิจกรรม <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className={`w-full p-2 border rounded-md ${errors.startDate ? 'border-red-500' : 'border-gray-300'}`}
-          />
-          {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>}
-        </div>
-  
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            วันที่สิ้นสุดกิจกรรม <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className={`w-full p-2 border rounded-md ${errors.endDate ? 'border-red-500' : 'border-gray-300'}`}
-          />
-          {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            สถานะ <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className={`w-full p-2 border rounded-md ${errors.status ? 'border-red-500' : 'border-gray-300'}`}
-          >
-            <option value="active">active</option>
-            <option value="inactive">inactive</option>
-            <option value="pending">pending</option>
-          </select>
-          {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
-        </div>
-
-        {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ผู้สร้างกิจกรรม (ID) <span className="text-red-500">*</span>
+          <div className='w-full'>
+            <label className="block text-sm font-medium text-gray-700 mb-1 ">
+              ชื่อกิจกรรม <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={createBy}
-              onChange={(e) => setCreateBy(e.target.value)}
-              className={`w-full p-2 border rounded-md ${errors.createBy ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="กรอก ID ผู้สร้าง"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={`w-full p-2 border  rounded-md ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+              placeholder="กรอกชื่อกิจกรรม"
             />
-            {errors.createBy && <p className="text-red-500 text-xs mt-1">{errors.createBy}</p>}
-          </div>  */}
+            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+          
+            <div className='mt-8'>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                รายละเอียด
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                rows={9}
+                placeholder="กรอกรายละเอียดกิจกรรม"
+              />
+            </div>
+          </div>
+      
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              วันที่เริ่มกิจกรรม <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className={`w-full p-2 border rounded-md ${errors.startDate ? 'border-red-500' : 'border-gray-300'}`}
+            />
+            {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>}
+          </div>
+    
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              วันที่สิ้นสุดกิจกรรม <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className={`w-full p-2 border rounded-md ${errors.endDate ? 'border-red-500' : 'border-gray-300'}`}
+            />
+            {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              สถานะ <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className={`w-full p-2 border rounded-md ${errors.status ? 'border-red-500' : 'border-gray-300'}`}
+            >
+              <option value="active">active</option>
+              <option value="inactive">inactive</option>
+              <option value="pending">pending</option>
+            </select>
+            {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
+          </div>
+
+          {/* <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                ผู้สร้างกิจกรรม (ID) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={createBy}
+                onChange={(e) => setCreateBy(e.target.value)}
+                className={`w-full p-2 border rounded-md ${errors.createBy ? 'border-red-500' : 'border-gray-300'}`}
+                placeholder="กรอก ID ผู้สร้าง"
+              />
+              {errors.createBy && <p className="text-red-500 text-xs mt-1">{errors.createBy}</p>}
+            </div>  */}
 
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ช่องทางการติดต่อ
-          </label>
-          <input
-            type="text"
-            value={contact}
-            onChange={(e) => setContact(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="เช่น เบอร์โทร, อีเมล"
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ช่องทางการติดต่อ
+            </label>
+            <input
+              type="text"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="เช่น เบอร์โทร, อีเมล"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              สถานที่จัดกิจกรรม <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={locationId}
+              onChange={(e) => setLocationId(Number(e.target.value) || '')}
+              className={`w-full p-2 border rounded-md ${errors.locationId ? 'border-red-500' : 'border-gray-300'}`}
+            >
+              <option value="">เลือกสถานที่</option>
+              {loadingLocations ? (
+                <option value="" disabled>กำลังโหลดข้อมูลสถานที่...</option>
+              ) : locations.length > 0 ? (
+                locations.map((location) => (
+                  <option key={location.location_id} value={location.location_id}>
+                    {location.location_name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>ไม่พบข้อมูลสถานที่</option>
+              )}
+            </select>
+            {errors.locationId && <p className="text-red-500 text-xs mt-1">{errors.locationId}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              จำนวนผู้เข้าร่วม <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              value={userCount}
+              onChange={(e) => setUserCount(Number(e.target.value) || '')}
+              className={`w-full p-2 border rounded-md ${errors.userCount ? 'border-red-500' : 'border-gray-300'}`}
+              placeholder="กรอกจำนวนผู้เข้าร่วม"
+            />
+            {errors.userCount && <p className="text-red-500 text-xs mt-1">{errors.userCount}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ราคา (บาท)
+            </label>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value) || '')}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              // placeholder="เช่น 0 หรือ 100"
+            />
+          </div>
+
+          <div >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              คุณสมบัติผู้เข้าร่วม
+            </label>
+            <input
+              type="text"
+              value={userProperty}
+              onChange={(e) => setUserProperty(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="ระบุคุณสมบัติผู้เข้าร่วมกิจกรรม"
+            />
+          </div>
+
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              หมายเหตุเพิ่มเติม
+            </label>
+            <textarea
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              rows={2}
+              placeholder="หมายเหตุอื่น ๆ"
+            />
+          </div>
+
+          <CheckboxGroup
+            items={activityTypes}
+            selectedItems={selectedActivityTypes}
+            onItemChange={handleActivityTypeChange}
+            idKey="activity_type_id"
+            nameKey="activity_type_name"
+            label="ประเภทกิจกรรม"
+          />
+
+          <CheckboxGroup
+            items={subjects}
+            selectedItems={selectedSubjects}
+            onItemChange={handleSubjectChange}
+            idKey="subject_id"
+            nameKey="subject_name"
+            label="รายวิชาที่เกี่ยวข้อง"
+            isLoading={loadingSubjects}
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            สถานที่จัดกิจกรรม <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={locationId}
-            onChange={(e) => setLocationId(Number(e.target.value) || '')}
-            className={`w-full p-2 border rounded-md ${errors.locationId ? 'border-red-500' : 'border-gray-300'}`}
+      
+        <div className="mt-6 mb-6">
+          <h2 className="text-xl font-bold mb-2">แบบฟอร์มกิจกรรม</h2>
+          <div id="dynamic-form-container">
+            <Testform formJson={formJson} setFormJson={setFormJson} />
+            {errors.formJson && <p className="text-red-500 text-xs mt-1">{errors.formJson}</p>}
+          </div>
+        </div>
+
+      
+        <div className="mt-6 text-center">
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className={`w-full py-2 px-4 text-white rounded-md ${isSubmitting ? 'bg-gray-500' : 'bg-orange-500 hover:bg-orange-700'}`}
           >
-            <option value="">เลือกสถานที่</option>
-            {loadingLocations ? (
-              <option value="" disabled>กำลังโหลดข้อมูลสถานที่...</option>
-            ) : locations.length > 0 ? (
-              locations.map((location) => (
-                <option key={location.location_id} value={location.location_id}>
-                  {location.location_name}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>ไม่พบข้อมูลสถานที่</option>
-            )}
-          </select>
-          {errors.locationId && <p className="text-red-500 text-xs mt-1">{errors.locationId}</p>}
+            {isSubmitting ? 'กำลังสร้างกิจกรรม...' : 'สร้างกิจกรรม'}
+          </button>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            จำนวนผู้เข้าร่วม <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            value={userCount}
-            onChange={(e) => setUserCount(Number(e.target.value) || '')}
-            className={`w-full p-2 border rounded-md ${errors.userCount ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="กรอกจำนวนผู้เข้าร่วม"
-          />
-          {errors.userCount && <p className="text-red-500 text-xs mt-1">{errors.userCount}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ราคา (บาท)
-          </label>
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value) || '')}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            // placeholder="เช่น 0 หรือ 100"
-          />
-        </div>
-
-        <div >
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            คุณสมบัติผู้เข้าร่วม
-          </label>
-          <input
-            type="text"
-            value={userProperty}
-            onChange={(e) => setUserProperty(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="ระบุคุณสมบัติผู้เข้าร่วมกิจกรรม"
-          />
-        </div>
-
-
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            หมายเหตุเพิ่มเติม
-          </label>
-          <textarea
-            value={remark}
-            onChange={(e) => setRemark(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            rows={2}
-            placeholder="หมายเหตุอื่น ๆ"
-          />
-        </div>
-
-        <CheckboxGroup
-          items={activityTypes}
-          selectedItems={selectedActivityTypes}
-          onItemChange={handleActivityTypeChange}
-          idKey="activity_type_id"
-          nameKey="activity_type_name"
-          label="ประเภทกิจกรรม"
-        />
-
-        <CheckboxGroup
-          items={subjects}
-          selectedItems={selectedSubjects}
-          onItemChange={handleSubjectChange}
-          idKey="subject_id"
-          nameKey="subject_name"
-          label="รายวิชาที่เกี่ยวข้อง"
-          isLoading={loadingSubjects}
-        />
-      </div>
-
-    
-      <div className="mt-6 mb-6">
-        <h2 className="text-xl font-bold mb-2">แบบฟอร์มกิจกรรม</h2>
-        <div id="dynamic-form-container">
-          <Testform formJson={formJson} setFormJson={setFormJson} />
-          {errors.formJson && <p className="text-red-500 text-xs mt-1">{errors.formJson}</p>}
-        </div>
-      </div>
-
-    
-      <div className="mt-6 text-center">
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className={`w-full py-2 px-4 text-white rounded-md ${isSubmitting ? 'bg-gray-500' : 'bg-orange-600 hover:bg-orange-700'}`}
-        >
-          {isSubmitting ? 'กำลังสร้างกิจกรรม...' : 'สร้างกิจกรรม'}
-        </button>
       </div>
     </div>
   );

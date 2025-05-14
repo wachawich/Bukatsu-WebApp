@@ -107,7 +107,7 @@ export default function UploadPage({ onImageUploaded }: UploadPageProps) {
         {!selectedImage ? (
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors duration-200 ${
-              isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
+              isDragging ? 'border-orange-500 bg-blue-50' : 'border-gray-300 hover:border-orange-500'
             }`}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={handleDragOver}

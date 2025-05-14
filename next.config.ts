@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
+  images: {
+    domains: ["bukatsustorage.blob.core.windows.net"], // ✅ เพิ่ม hostname ที่ต้องการ
+  },
 };
 
 export default nextConfig;

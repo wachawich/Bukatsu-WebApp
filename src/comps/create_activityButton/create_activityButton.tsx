@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import jwtDecode from "@/utils/auth/jwt";
-import { Plus } from "lucide-react";
+// import jwtDecode from "@/utils/auth/jwt";
+import { IconPlus } from "@tabler/icons-react";
+import ActivityCard from "@/comps/homepage/activityCard";
 
 interface ActivityField {
   id: string;
@@ -15,7 +16,7 @@ interface ActivityField {
   location_id?: number;
   user_count: number;
   create_by: string;
-  participants?: string[]; // เพิ่ม field นี้เพื่อเก็บคนที่เข้าร่วม
+  participants?: string[]; 
   image?: string;
 }
 
@@ -24,24 +25,29 @@ interface TokenPayload {
 }
 
 const MyActivity = () => {
-  const [activeTab, setActiveTab] = useState("task"); // "task" = เข้าร่วม, "create" = สร้าง
+  const [activeTab, setActiveTab] = useState("task"); 
   const [activeCategory, setActiveCategory] = useState("today");
   const [activities, setActivities] = useState<ActivityField[]>([]);
   const router = useRouter();
+  
+  useEffect(() => {
+      const storedActivities = JSON.parse(localStorage.getItem("activities") || "[]");
+      setActivities(storedActivities);
+  }, [router.asPath]); 
 
-  // ฟังก์ชันดึงกิจกรรมที่ฉันสร้าง
+
   const getMyCreatedActivities = (userId: string): ActivityField[] => {
     const stored = JSON.parse(localStorage.getItem("activities") || "[]");
     return stored.filter((act: ActivityField) => act.create_by === userId);
   };
 
-  // ฟังก์ชันดึงกิจกรรมที่ฉันเข้าร่วม
+
   const getMyJoinedActivities = (userId: string): ActivityField[] => {
     const stored = JSON.parse(localStorage.getItem("activities") || "[]");
     return stored.filter((act: ActivityField) => act.participants?.includes(userId));
   };
 
-  // โหลดข้อมูลเมื่อเข้ามาที่หน้านี้ หรือเมื่อ tab เปลี่ยน หรือเมื่อกลับมาจากหน้าอื่น
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -64,12 +70,12 @@ const MyActivity = () => {
     }
   }, [activeTab, router.asPath]);
 
-  // นำทางไปยังหน้าสร้างกิจกรรม
+ 
   const goToCreateActivityPage = () => {
     router.push("/create_activity");
   };
 
-  // ฟังก์ชันกรองและแสดงการ์ดกิจกรรม
+ 
   const renderActivityCards = () => {
     const today = new Date();
 
@@ -101,17 +107,18 @@ const MyActivity = () => {
     return (
       <div className="space-y-4 mt-4">
         {filteredActivities.map((activity, index) => (
-          <Card key={index} activity={activity} />
+          <ActivityCard key={index} activity={activity} />
         ))}
       </div>
     );
   };
+  
 
   return (
     <div className="p-6 bg-[#F5F9FF] min-h-screen relative">
       <h1 className="text-2xl font-bold mb-4">Activity</h1>
 
-      {/* แท็บหลัก: Task และ Create Activity */}
+      
       <div className="flex gap-4 mb-4">
         <button
           onClick={() => setActiveTab("task")}
@@ -131,7 +138,6 @@ const MyActivity = () => {
         </button>
       </div>
 
-      {/* แท็บย่อยของ Task: Today, Upcoming, Overdue, Done */}
       {activeTab === "task" && (
         <>
           <div className="flex gap-6 text-sm font-medium text-gray-600 border-b border-gray-300 pb-2">
@@ -154,56 +160,35 @@ const MyActivity = () => {
         </>
       )}
 
-      {/* แสดงข้อความถ้าไม่มีกิจกรรมในแท็บ Create Activity */}
+
       {activeTab === "create" && activities.length === 0 && (
         <div className="mt-10 text-center text-gray-500 text-sm">
           No activity created yet. Click + to create.
         </div>
       )}
 
-      {/* แสดงรายการกิจกรรมที่สร้างในแท็บ Create Activity */}
+     
       {activeTab === "create" && activities.length > 0 && (
         <div className="space-y-4 mt-4">
           {activities.map((activity, index) => (
-            <Card key={index} activity={activity} />
+            <ActivityCard key={index} activity={activity} />
           ))}
         </div>
       )}
 
-      {/* ปุ่ม + สำหรับสร้างกิจกรรมใหม่ */}
+    
       {activeTab === "create" && (
         <button
           onClick={goToCreateActivityPage}
           className="bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl absolute bottom-6 right-6 shadow-lg hover:bg-blue-600 transition"
         >
-          {/* <Plus size={28} /> */}
+          <IconPlus size={28} />
         </button>
       )}
     </div>
   );
 };
 
-// คอมโพเนนต์การ์ดกิจกรรม
-// const Card = ({ activity }: { activity: ActivityField }) => {
-//   return (
-//     <div className="bg-white rounded-xl p-4 shadow flex items-center gap-4">
-//       <div className="w-1/3 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold h-24">
-//         {activity.image ? (
-//           <img src={activity.image} alt="activity" className="object-cover w-full h-full rounded-lg" />
-//         ) : (
-//           <span>PR</span>
-//         )}
-//       </div>
-//       <div className="w-2/3 pl-4">
-//         <div className="font-bold text-sm text-blue-600 mb-1">{activity.title}</div>
-//         <div className="text-gray-700 text-sm mb-2">{activity.description}</div>
-//         <div className="text-gray-500 text-xs">
-//           {activity.start_date} - {activity.end_date}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
 
 export default MyActivity;
 
