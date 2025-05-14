@@ -7,11 +7,14 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router.js";
 import { setTimeout } from "timers";
-import { ShowNoti } from "@/comps/noti/notiComp";
 // import { LoadingProvider } from "@/comps/loading/LoadingContext";
 // import LoadingComponent from "@/comps/loading/LoadingComponent";
 import { SessionProvider, signOut } from "next-auth/react";
 import Script from "next/script.js";
+import { decodeToken } from "@/utils/auth/jwt";
+import { useNotification } from "@/comps/noti/notiComp"
+
+import { NotificationProvider } from "@/comps/noti/notiComp";
 
 const App = ({
     Component,
@@ -23,53 +26,58 @@ const App = ({
     const [isRefreshingToken, setIsRefreshingToken] = useState(true);
     const [isRender, setIsRender] = useState(false);
 
+    //const { showNotification } = useNotification();
+
     const router = useRouter();
 
     useEffect(() => {
-        const storedToken = localStorage.getItem("authToken");
-        setToken(storedToken);
+        const token = decodeToken();
+
+        setToken(token)
     }, []);
 
-    useEffect(() => {
-        if (!(router.pathname === "/login" || router.pathname === "/redirect_in")) {
-            signOut({ redirect: false });
-        }
-    }, [token, router.pathname, hasToken]);
+    // useEffect(() => {
+    //     const storedToken = localStorage.getItem("authToken");
+    //     setToken(storedToken);
+    // }, []);
+
+    // useEffect(() => {
+    //     if (!(router.pathname === "/login" || router.pathname === "/redirect_in")) {
+    //         signOut({ redirect: false });
+    //     }
+    // }, [token, router.pathname, hasToken]);
 
     useEffect(() => {
         if (
             token ||
-            router.pathname === "/login" ||
-            router.pathname === "/redirect_in" ||
-            router.pathname === "/test"
+            router.pathname === "/auth/login" ||
+            router.pathname === "/auth/register"
         ) {
             setHasToken(true);
             setIsRender(true);
         } else {
             setTimeout(() => {
-                const authToken = localStorage.getItem("authToken");
 
-                if (!authToken) {
-                    ShowNoti({
-                        response: "error",
-                        message: "err_please_login",
-                    });
+                const token = decodeToken();
 
-                    router.push("login");
+                if (!token) {
+                    // showNotification("Not found token!", `Pls Login before!`, "error");
+
+                    router.push("/auth/login");
                 }
             }, 3000);
         }
     }, [token, router.pathname, hasToken]);
 
-    useEffect(() => {
-        function redirectToLogin(token: string | null, pathname: string) {
-            // You can add logic here if needed
-        }
+    // useEffect(() => {
+    //     function redirectToLogin(token: string | null, pathname: string) {
+    //         // You can add logic here if needed
+    //     }
 
-        if (router.isReady && router.pathname && router.pathname !== "/login") {
-            redirectToLogin(token, router.pathname);
-        }
-    }, [router.isReady, router.pathname]);
+    //     if (router.isReady && router.pathname && router.pathname !== "/login") {
+    //         redirectToLogin(token, router.pathname);
+    //     }
+    // }, [router.isReady, router.pathname]);
 
     return (
         <>
@@ -99,25 +107,18 @@ const App = ({
         `}
             </Script>
 
-            {/* <LoadingProvider>
-        <LoadingComponent />
-        {hasToken && (
-          <SessionProvider session={session}>
-            {isRefreshingToken && isRender && (
-              <Component {...pageProps} data={data} setData={setData} />
-            )}
-          </SessionProvider>
-        )}
-        <LoadingComponent />
-      </LoadingProvider> */}
+
 
             {hasToken && (
                 <SessionProvider session={session}>
+
                     {isRefreshingToken && isRender && (
                         <Component {...pageProps} data={data} setData={setData} />
                     )}
+
                 </SessionProvider>
             )}
+
         </>
     );
 };

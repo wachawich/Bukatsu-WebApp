@@ -3,6 +3,8 @@ import { ActivityField, getActivity } from '@/utils/api/activity';
 import { SubjectField, getSubject } from '@/utils/api/subject';
 import ActivityCard from './activityCard';
 import SubjectCard from './subjectCard';
+import { getUser } from "@/utils/api/userData"
+
 function Homepage() {
   const [sima, setSima] = useState<any>(null);
   const [activities, setActivities] = useState<ActivityField[]>([]);
