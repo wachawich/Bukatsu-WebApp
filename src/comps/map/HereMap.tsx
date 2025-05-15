@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-
+import React, { useEffect, useRef, useState  } from 'react';
+import { addMarkersToMap } from './handleMarkerSelection';
 import { getLocation } from "@/utils/api/location"
 
 // ฟังก์ชันโหลด script แบบเรียงลำดับ
@@ -120,11 +120,70 @@ const createPedestrianRoute = (map, platform, start, end) => {
 
 
 
-
-
 const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null); // ใช้เก็บ instance ของแผนที่
+  const startRef = useRef<{ lat: number; lng: number } | null>(null);
+  const endRef = useRef<{ lat: number; lng: number } | null>(null);
+  const routeObjectsRef = useRef<any[]>([]); // เก็บ polyline และ marker
+  const [map, setMap] = useState<any>(null);
+  const [ui, setUi] = useState<any>(null);
+  const [markers, setMarkers] = useState<any[]>([]);
+
+  // ✅ เพิ่มสถานะและ marker
+  const [status, setStatus] = useState("กรุณาเลือกจุดเริ่มต้น");
+  const startMarkerRef = useRef<any>(null);
+  const endMarkerRef = useRef<any>(null);
+
+  const tryCreateRoute = () => {
+  if (startRef.current && endRef.current && mapInstanceRef.current) {
+    const platform = new window.H.service.Platform({
+      apikey: 'fAnmdyEh8EyRxpTms7faftupQenGyqHL63ckLKQRDKc',
+    });
+
+    // ลบ route เดิมออกก่อน
+    routeObjectsRef.current.forEach(obj => {
+      mapInstanceRef.current.removeObject(obj);
+    });
+    routeObjectsRef.current = [];
+
+    const router = platform.getRoutingService(null, 8);
+    const routeRequestParams = {
+      routingMode: 'fast',
+      transportMode: 'pedestrian',
+      origin: `${startRef.current.lat},${startRef.current.lng}`,
+      destination: `${endRef.current.lat},${endRef.current.lng}`,
+      return: 'polyline,summary,actions,instructions',
+    };
+
+    router.calculateRoute(routeRequestParams, (result) => {
+      if (result.routes.length === 0) {
+        console.warn("No route found.");
+        return;
+      }
+
+      const route = result.routes[0];
+      route.sections.forEach((section) => {
+        const linestring = window.H.geo.LineString.fromFlexiblePolyline(section.polyline);
+        const routeLine = new window.H.map.Polyline(linestring, {
+          style: { strokeColor: '#1e90ff', lineWidth: 5 },
+        });
+        const startMarker = new window.H.map.Marker(section.departure.place.location);
+        const endMarker = new window.H.map.Marker(section.arrival.place.location);
+
+        routeObjectsRef.current.push(routeLine, startMarker, endMarker);
+        mapInstanceRef.current.addObjects([routeLine, startMarker, endMarker]);
+
+        mapInstanceRef.current.getViewModel().setLookAtData({
+          bounds: routeLine.getBoundingBox(),
+        });
+      });
+    }, (error) => {
+      console.error("Routing error:", error);
+    });
+  }
+};
+
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -162,12 +221,12 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         mapInstanceRef.current = map;  // เก็บแผนที่ที่สร้างใน ref
         
         //Route
-        createPedestrianRoute(
-          mapInstanceRef.current,
-          platform,
-          { lat: 13.6534596, lng: 100.4949939 },  // จุด A
-          { lat: 13.6502076, lng: 100.4919385 }   // จุด B
-        );
+        // createPedestrianRoute(
+        //   mapInstanceRef.current,
+        //   platform,
+        //   { lat: 13.6534596, lng: 100.4949939 },  // จุด A
+        //   { lat: 13.6509712, lng: 100.4917004 }   // จุด B
+        // );
 
         
         // ฟังก์ชันรีไซส์เมื่อหน้าจอเปลี่ยนขนาด
@@ -180,10 +239,14 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
 
         // UI เริ่มต้น
         const ui = window.H.ui.UI.createDefault(map, defaultLayers);
+        setMap(map);
+        setUi(ui);
+
+
 
         const locationData : any = await getLocation({flag_valid: true})
         console.log("locationData", locationData.data)
-
+        setMarkers(locationData.data);
         const latCenter = locationData.data[0].lat
         const lngCenter = locationData.data[0].long;
         map.setCenter({ lat: 13.651287687026441 , lng: 100.494473986665 }, true);
@@ -215,20 +278,6 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         //   { lat: 13.64800363730579, lng: 100.49356857256268, info: 'จุด2' }
         // ];
 
-        markers.forEach(({ lat, long, location_id, location_name }) => {
-            const marker = new window.H.map.Marker({ lat, lng: long });
-
-          if (location_name) {
-            marker.setData(location_name);
-            marker.addEventListener('tap', evt => {
-              console.log(location_name);
-            //   onShowModal(<p>{location_name}</p>);
-            //   onLocationSelect(parseInt(location_id))
-            });
-          }
-          map.addObject(marker);
-        });
-
       } catch (error) {
         console.error('Error loading HERE Maps:', error);
       }
@@ -244,6 +293,20 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
       }
     };
   }, []);
+
+      //Click Route
+      useEffect(() => {
+        if (map && ui && markers.length > 0) {
+          addMarkersToMap(map, ui, markers, {
+            setStatus,
+            tryCreateRoute,
+            startRef,
+            endRef,
+            startMarkerRef,
+            endMarkerRef,
+          });
+        }
+      }, [map, ui, markers]);
 
   return (
     <div ref={mapRef} style={{ display: 'flex', width: '100vw', height: '93.7vh' }} />
