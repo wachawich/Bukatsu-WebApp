@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { Dialog } from '@headlessui/react';
 import FormPreview from '@/comps/form/form-builder/form-preview';
 
+
 type ExtendedActivityField = ActivityField & {
   activity_type_data?: {
     activity_type_id: number;
@@ -88,7 +89,7 @@ const ActivityDetail: React.FC = () => {
   if (!activity) return <p className="text-center text-red-500">ไม่พบกิจกรรม</p>;
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl mx-auto font-sans ">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto ">
       <div className="bg-white  rounded-xl shadow-lg overflow-hidden ">
         <div className="relative">
           <div className="absolute top-2 right-2 rounded-full p-2 shadow-md">
@@ -225,6 +226,8 @@ const ActivityDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      
 
       {/* <Dialog open={isFormOpen} onClose={() => setIsFormOpen(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
