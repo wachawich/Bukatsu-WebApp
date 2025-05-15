@@ -219,7 +219,7 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         );
 
         mapInstanceRef.current = map;  // เก็บแผนที่ที่สร้างใน ref
-        
+
         //Route
         // createPedestrianRoute(
         //   mapInstanceRef.current,
