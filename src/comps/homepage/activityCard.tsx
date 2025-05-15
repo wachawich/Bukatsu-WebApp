@@ -1,14 +1,26 @@
 import { ActivityField } from "@/utils/api/activity";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/router";
+
 
 interface ActivityCardProps {
   activity: ActivityField;
+  isEditable?: boolean;
 }
 
-export default function ActivityCard({ activity }: ActivityCardProps) {
+export default function ActivityCard({ activity, isEditable }: ActivityCardProps) {
+  const router = useRouter();
+
+  const handleEditClick = () => {
+    router.push(`/edit_activity/${activity.activity_id}`);
+  };
+
+  const handleViewDetail = () => {
+    router.push(`/activity_detail?activity_id=${activity.activity_id}`);
+  };
+
   return (
-    <div className="flex border rounded-lg p-4 shadow hover:shadow-lg transition-all bg-white gap-4 w-full h-full min-h-60 max-h-64">
+    <div className="relative flex border rounded-lg p-4 shadow hover:shadow-lg transition-all bg-white gap-4 w-full h-full min-h-60 max-h-64">
       <Image
         src={activity.image_link?.banner || "/default-banner.jpg"}
         alt="Banner Image"
@@ -29,7 +41,6 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
                 {type.activity_type_name}
               </span>
             ))}
-
             {activity.activity_subject_data?.map((subject) => (
               <span
                 key={`subject-${subject.subject_id}`}
@@ -44,12 +55,23 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
             {activity.description}
           </p>
         </div>
-        <div className="mt-2 self-end">
-          <Link href={`/activity_detail?activity_id=${activity.activity_id}`}>
-            <button className="text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded">
-              ดูเพิ่มเติม
+
+        <div className="mt-2 self-end flex gap-2">
+          <button
+            onClick={handleViewDetail}
+            className="text-xs md:text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded"
+          >
+            ดูเพิ่มเติม
+          </button>
+            {/* // สำหรับหน้าแก้ไข */}
+          {isEditable && (
+            <button
+              onClick={handleEditClick}
+              className="text-xs md:text-sm bg-gray-400 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
+            >
+              แก้ไข
             </button>
-          </Link>
+          )}
         </div>
       </div>
     </div>
