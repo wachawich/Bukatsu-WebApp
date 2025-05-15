@@ -1,9 +1,10 @@
-import React from 'react'
-import Link from 'next/link';
+import React, {useEffect, useState} from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import ActivityDetail from "@/comps/activityDetail/activity_detailPage"
+import Myactivity from "@/comps/create_activityButton/create_activityButton"
+
+
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -15,9 +16,8 @@ function PageContent() {
 
 
     return (
-        <div className="bg-[#343434] w-full min-h-screen pt-14 overflow-auto">
-            <ActivityDetail/>
-          
+        <div className="bg-[#343434] w-full h-full pt-14">
+            <Myactivity/>
         </div>
         // <>
         //     {canRead && (
@@ -30,7 +30,7 @@ function PageContent() {
 }
 
 
-export default function ActivityDetails() {
+export default function create_activity() {
     return (
         <>
             <LayoutShell>

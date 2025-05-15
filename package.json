@@ -36,6 +36,7 @@
     "class-variance-authority": "^0.7.1",
     "dayjs": "^1.11.13",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.507.0",
     "next": "15.1.7",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",

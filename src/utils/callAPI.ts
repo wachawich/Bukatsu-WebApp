@@ -39,3 +39,28 @@ export async function fetchDataApi(method: string, from: string, body: {}, route
     }
 }
 
+
+
+export async function sendDataApi(method: string, from: string, body: {}): Promise<any> {
+    const isFormData = body instanceof FormData;
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/${from}`, {
+            method,
+            headers: isFormData ? undefined : { 'Content-Type': 'application/json' },
+            body: method !== 'GET' ? (isFormData ? body : JSON.stringify(body)) : undefined,
+        });
+
+        const text = await response.text();
+        try {
+            const data = JSON.parse(text);
+            return data;
+        } catch (err) {
+            console.error("Server response is not JSON:", text);
+            throw new Error(`Invalid JSON: ${text}`);
+        }
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
