@@ -22,10 +22,10 @@ function PageContent() {
     if (!activity) return <p>ไม่พบกิจกรรม</p>;
 
     return (
-        <div className="bg-[#343434] w-full min-h-screen pt-14 overflow-auto p-8 mt-8">
+        <div className="bg-[#343434] w-full min-h-screen pt-14 overflow-auto p-40 mt-8">
            <div className='bg-white rounded-xl p-10'>
             {activity && activity.title && (
-            <h1 className="text-2xl font-bold text-center mb-6">{activity.title}</h1>
+            <h1 className="text-2xl font-bold text-center mb-6 text-blue-900">{activity.title}</h1>
             )}
             
             <FormPreview

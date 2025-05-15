@@ -3,7 +3,7 @@ import { getActivity, ActivityField } from "@/utils/api/activity";
 import { fetchDataApi } from "@/utils/callAPI";
 import Image from 'next/image';
 import Heart from "./Heart";
-import { IconCameraPin, IconCalendar } from '@tabler/icons-react'; 
+import { IconCameraPin, IconClock } from '@tabler/icons-react'; 
 import { useRouter } from "next/router";
 import { Dialog } from '@headlessui/react';
 import FormPreview from '@/comps/form/form-builder/form-preview';
@@ -89,46 +89,71 @@ const ActivityDetail: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto font-sans ">
-      <div className="bg-white  rounded-xl shadow-lg overflow-hidden p-4">
-      <div className="p-2 text-center">
-        <div >
-          <div className="flex justify-end ">
-            <Heart />
+      <div className="bg-white  rounded-xl shadow-lg overflow-hidden ">
+        <div className="relative">
+          <div className="absolute top-2 right-2 rounded-full p-2 shadow-md">
+              <Heart />
           </div>
+          <Image 
+              src={activity.image_link?.banner || "/default-banner.jpg"} 
+              alt="Banner Image" 
+              width={1000} 
+              height={400} 
+              className="w-full h-auto  "
+            />
+        </div>
+      
+        <div className="text-center mt-6">
+          {((activity.activity_type_data?.length ?? 0) > 0 || (activity.activity_type_data?.length ?? 0)  > 0) && (
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-2 justify-center items-center">
+                  {activity.activity_type_data?.map((type: any) => (
+                    <span
+                      key={`type-${type.activity_type_id}`} 
+                      className="bg-orange-200 text-orange-600 px-3 py-1 text-sm"
+                    >
+                      {type.activity_type_name}
+                    </span>
+                  ))}
+                  {activity.activity_subject_data?.map((subject: any) => (
+                    <span
+                      key={`subject-${subject.subject_id}`}
+                      className="bg-orange-200 text-orange-600 px-3 py-1 text-sm"
+                    >
+                      {subject.subject_name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+        
           <h1 className="text-2xl sm:text-4xl font-bold text-blue-900">{activity.title}</h1>
+          <div className="flex items-center justify-center text-gray-500 text-sm gap-2">
+            <IconClock  size={18} className="text-orange-500 mt-3 mb-4" />
+            <p className="text-sm text-gray-500 mt-2 mb-4">
+              โพสต์เมื่อ {new Date(activity.create_date).toLocaleDateString("th-TH", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+              })}
+              {creator && (
+                <span className="ml-6 text-gray-700">
+                  โดย {creator.username }
+                </span>
+              )}
+            </p>
+          </div>
         </div>
-
-        <div className="flex items-center justify-center text-gray-500 text-sm gap-2">
-        <IconCalendar size={20} className="text-orange-500 mt-2 mb-4" />
-        <p className="text-sm text-gray-500 mt-2 mb-4">
-          โพสต์เมื่อ {new Date(activity.create_date).toLocaleDateString("th-TH", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric"
-          })}
-          {creator && (
-            <span className="ml-6 text-gray-700">
-              โดย {creator.username }
-            </span>
-          )}
-        </p>
-        </div>
-      </div>
 
           
-        <Image 
-          src={activity.image_link?.banner || "/default-banner.jpg"} 
-          alt="Banner Image" 
-          width={1000} 
-          height={400} 
-          className="w-full h-auto rounded-3xl "
-        />
+        
  
         <div className="p-4">
          <p style={{ textIndent: "2rem" }} className="mb-2 p-7 text-base leading-relaxed">
           {activity.description}
         </p>
 
+          <div className="p-6"> 
           <div className="bg-blue-50 border-l-4 border-blue-400 p-8 mb-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-semibold text-blue-800 mb-2">รายละเอียดกิจกรรม</h2>
             <ul className="list-disc ml-5 space-y-1 text-gray-700">
@@ -165,29 +190,7 @@ const ActivityDetail: React.FC = () => {
 
 
           </div>
-          {((activity.activity_type_data?.length ?? 0) > 0 || (activity.activity_type_data?.length ?? 0)  > 0) && (
-            <div className="mb-6">
-              <div className="flex flex-wrap gap-2 justify-center items-center">
-                {activity.activity_type_data?.map((type: any) => (
-                  <span
-                    key={`type-${type.activity_type_id}`} 
-                    className="bg-orange-200 text-orange-600 px-3 py-1 text-sm"
-                  >
-                    {type.activity_type_name}
-                  </span>
-                ))}
-                {activity.activity_subject_data?.map((subject: any) => (
-                  <span
-                    key={`subject-${subject.subject_id}`}
-                    className="bg-orange-200 text-orange-600 px-3 py-1 text-sm"
-                  >
-                    {subject.subject_name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
+          </div>  
 
 
           <p>location</p>
