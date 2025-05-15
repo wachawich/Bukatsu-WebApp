@@ -66,6 +66,62 @@ interface HereMapProps {
   onLocationSelect?: (location_id: number) => void; // เพิ่มตรงนี้
 }
 
+//Route
+const createPedestrianRoute = (map, platform, start, end) => {
+  const router = platform.getRoutingService(null, 8);
+
+  const routeRequestParams = {
+    routingMode: 'fast',
+    transportMode: 'pedestrian',
+    origin: `${start.lat},${start.lng}`,
+    destination: `${end.lat},${end.lng}`,
+    return: 'polyline,summary,actions,instructions',
+  };
+
+  router.calculateRoute(
+    routeRequestParams,
+    (result) => {
+      if (result.routes.length === 0) {
+        console.warn("No route found.");
+        return;
+      }
+
+      const route = result.routes[0];
+
+      route.sections.forEach((section) => {
+        // ✅ Decode polyline
+        const linestring = window.H.geo.LineString.fromFlexiblePolyline(section.polyline);
+
+        // ✅ Create polyline route
+        const routeLine = new window.H.map.Polyline(linestring, {
+          style: { strokeColor: '#1e90ff', lineWidth: 5 },
+        });
+
+        // ✅ Create start/end markers
+        const startMarker = new window.H.map.Marker(section.departure.place.location);
+        const endMarker = new window.H.map.Marker(section.arrival.place.location);
+
+        // ✅ Add all objects to map
+        map.addObjects([routeLine, startMarker, endMarker]);
+
+        // ✅ Auto zoom to fit the route
+        map.getViewModel().setLookAtData({
+          bounds: routeLine.getBoundingBox(),
+        });
+
+        console.log("Route line and markers added to map.");
+      });
+    },
+    (error) => {
+      console.error("Routing error:", error);
+    }
+  );
+};
+
+
+
+
+
 const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null); // ใช้เก็บ instance ของแผนที่
@@ -93,19 +149,27 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         });
 
         const defaultLayers = platform.createDefaultLayers();
-
         const map = new window.H.Map(
           mapRef.current,
           defaultLayers.vector.normal.map,
           {
-            center: { lat: 13.64911325579706, lng: 100.49248981372405 },
-            zoom: 16,
+            center: { lat: 13.650873296192813, lng: 100.49411584028002 },
+            zoom: 17.5,
             pixelRatio: window.devicePixelRatio || 1,
           }
         );
 
         mapInstanceRef.current = map;  // เก็บแผนที่ที่สร้างใน ref
+        
+        //Route
+        createPedestrianRoute(
+          mapInstanceRef.current,
+          platform,
+          { lat: 13.6534596, lng: 100.4949939 },  // จุด A
+          { lat: 13.6502076, lng: 100.4919385 }   // จุด B
+        );
 
+        
         // ฟังก์ชันรีไซส์เมื่อหน้าจอเปลี่ยนขนาด
         window.addEventListener('resize', () => map.getViewPort().resize());
 
@@ -121,7 +185,25 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         console.log("locationData", locationData.data)
 
         const latCenter = locationData.data[0].lat
-        const lngCenter = locationData.data[0].lat
+        const lngCenter = locationData.data[0].long;
+        map.setCenter({ lat: 13.651287687026441 , lng: 100.494473986665 }, true);
+
+        const defaultCenter = { lat: latCenter, lng: lngCenter };
+
+        // --- ใส่ event ที่นี่เลย ---
+        map.addEventListener('mapviewchangeend', () => {
+          const currentCenter = map.getCenter();
+
+          const distanceLat = Math.abs(currentCenter.lat - defaultCenter.lat);
+          const distanceLng = Math.abs(currentCenter.lng - defaultCenter.lng);
+
+          const threshold = 0.005;
+          if (distanceLat > threshold || distanceLng > threshold) {
+            console.log('ดึงกลับมาที่ศูนย์กลาง');
+            map.setCenter(defaultCenter, true);
+          }
+        });
+
 
         const markers = locationData.data
 
