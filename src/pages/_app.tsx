@@ -58,11 +58,14 @@ const App = ({
         } else if (
             router.pathname === "/home" ||
             router.pathname === "/calendar" ||
-            router.pathname === "/map"
+            router.pathname === "/map" ||
+            (router.pathname === "/activity_detail" && router.query.activity_id)
         ) {
             setHasToken(true);
             setIsRender(true);
         }
+
+
         else {
             setTimeout(() => {
 
