@@ -59,6 +59,7 @@ const App = ({
             router.pathname === "/home" ||
             router.pathname === "/calendar" ||
             router.pathname === "/map" ||
+            router.pathname === "/myactivity" ||
             (router.pathname === "/activity_detail" && router.query.activity_id)
         ) {
             setHasToken(true);
@@ -122,11 +123,11 @@ const App = ({
 
             {hasToken && (
                 <SessionProvider session={session}>
-
-                    {isRefreshingToken && isRender && (
-                        <Component {...pageProps} data={data} setData={setData} />
-                    )}
-
+                    <NotificationProvider>
+                        {isRefreshingToken && isRender && (
+                            <Component {...pageProps} data={data} setData={setData} />
+                        )}
+                    </NotificationProvider>
                 </SessionProvider>
             )}
 

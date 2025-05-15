@@ -125,6 +125,11 @@ export function MainLinks() {
         route: "club",
     });
 
+    data.push({
+        label: "Map",
+        route: "map",
+    });
+
     // if (pageFlag.master_data && pageFlag.master_data.read) {
     //     data_manage.push({
     //         icon: <IconAdjustmentsHorizontal size="1.5rem" />,

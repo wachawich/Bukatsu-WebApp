@@ -5,6 +5,8 @@ import ActivityCard from './activityCard';
 import SubjectCard from './subjectCard';
 import { getUser } from "@/utils/api/userData"
 
+import { useRouter } from "next/router.js";
+
 type ExtendedActivityField = ActivityField & {
   activity_type_data?: {
     activity_type_id: number;
@@ -25,6 +27,8 @@ function Homepage() {
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingTypes, setLoadingTypes] = useState(true);
+
+  const router = useRouter();
 
   // ดึงข้อมูลกิจกรรม
   const fetchActivities = async () => {
@@ -66,7 +70,7 @@ function Homepage() {
     fetchTypes();
     fetchActivities();
     fetchSubjects();
-  }, []);
+  }, [router.isReady]);
 
 
   // คำนวณรายการกิจกรรมที่กรองแล้ว
