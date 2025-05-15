@@ -8,13 +8,13 @@ interface ActivityCardProps {
 
 export default function ActivityCard({ activity }: ActivityCardProps) {
   return (
-    <div className="flex border rounded-lg p-4 shadow hover:shadow-lg transition-all bg-white gap-4 w-full h-full min-h-60 ">
+    <div className="flex border rounded-lg p-4 shadow hover:shadow-lg transition-all bg-white gap-4 w-full h-full min-h-60 max-h-64">
       <Image
         src={activity.image_link?.banner || "/default-banner.jpg"}
         alt="Banner Image"
         width={1000}
         height={400}
-        className="w-2/5 h-full object-cover rounded-md"
+        className="w-2/5 object-cover rounded-md"
       />
       <div className="flex flex-col justify-between flex-1">
         <div className="m-1">
