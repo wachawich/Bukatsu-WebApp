@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState  } from 'react';
 import { addMarkersToMap } from './handleMarkerSelection';
 import { getLocation } from "@/utils/api/location"
-
+import { getUserLocationWithMarker } from './getUserLocation'; 
 // ฟังก์ชันโหลด script แบบเรียงลำดับ
 function loadScriptSequentially(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -219,6 +219,13 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         );
 
         mapInstanceRef.current = map;  // เก็บแผนที่ที่สร้างใน ref
+        await getUserLocationWithMarker(mapInstanceRef.current)
+          .then((userPos) => {
+            console.log("ตำแหน่งผู้ใช้:", userPos); // ถ้าจะใช้ lat/lng ต่อ สามารถเก็บไว้ใน state ได้
+          })
+          .catch((err) => {
+            console.error("ไม่สามารถดึงตำแหน่งผู้ใช้ได้:", err);
+          });
 
         //Route
         // createPedestrianRoute(
