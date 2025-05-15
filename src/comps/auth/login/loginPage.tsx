@@ -50,9 +50,9 @@ const LoginPage = () => {
   const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const user = decodeToken();
-    
-    if (user) {
+    const token = decodeToken();
+
+    if (token) {
       router.push("/home");
     }
   }, []);
