@@ -1,8 +1,9 @@
 import React from 'react'
+import Link from 'next/link';
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import ActivityDetail from "@/comps/activityDetail/activityDetail"
+import ActivityDetail from "@/comps/activityDetail/activity_detailPage"
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -12,9 +13,11 @@ function PageContent() {
     //     "check_in"
     // );
 
+
     return (
-        <div className="bg-[#343434] w-full h-full pt-14">
+        <div className="bg-[#343434] w-full min-h-screen pt-14 overflow-auto">
             <ActivityDetail/>
+          
         </div>
         // <>
         //     {canRead && (

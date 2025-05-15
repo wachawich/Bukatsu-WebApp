@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
-  // Image
-   images: {
+
+  images: {
     domains: ['bukatsustorage.blob.core.windows.net'],
   },
 };
