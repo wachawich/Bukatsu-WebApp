@@ -55,7 +55,15 @@ const App = ({
         ) {
             setHasToken(true);
             setIsRender(true);
-        } else {
+        } else if (
+            router.pathname === "/home" ||
+            router.pathname === "/calendar" ||
+            router.pathname === "/map"
+        ) {
+            setHasToken(true);
+            setIsRender(true);
+        }
+        else {
             setTimeout(() => {
 
                 const token = decodeToken();
