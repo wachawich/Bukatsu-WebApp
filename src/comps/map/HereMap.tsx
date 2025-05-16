@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-
+import React, { useEffect, useRef, useState  } from 'react';
 import { getLocation } from "@/utils/api/location"
-
+import MapRouteModal from "./MapRouteModal"; // ปรับ path ตามจริง
+import { useRouter } from "next/router";
+import { findAndRouteFromId } from "./findAndRouteFromId";
 // ฟังก์ชันโหลด script แบบเรียงลำดับ
 function loadScriptSequentially(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -63,68 +64,49 @@ async function waitForHereSDK(retries = 10, delay = 300): Promise<void> {
 
 interface HereMapProps {
   onShowModal?: (content: React.ReactNode) => void;
-  onLocationSelect?: (location_id: number) => void; // เพิ่มตรงนี้
+  onLocationSelect?: (callback: (location_id: number) => void) => void;
+  locationId: number;
 }
-
-//Route
-const createPedestrianRoute = (map, platform, start, end) => {
-  const router = platform.getRoutingService(null, 8);
-
-  const routeRequestParams = {
-    routingMode: 'fast',
-    transportMode: 'pedestrian',
-    origin: `${start.lat},${start.lng}`,
-    destination: `${end.lat},${end.lng}`,
-    return: 'polyline,summary,actions,instructions',
-  };
-
-  router.calculateRoute(
-    routeRequestParams,
-    (result) => {
-      if (result.routes.length === 0) {
-        console.warn("No route found.");
-        return;
-      }
-
-      const route = result.routes[0];
-
-      route.sections.forEach((section) => {
-        // ✅ Decode polyline
-        const linestring = window.H.geo.LineString.fromFlexiblePolyline(section.polyline);
-
-        // ✅ Create polyline route
-        const routeLine = new window.H.map.Polyline(linestring, {
-          style: { strokeColor: '#1e90ff', lineWidth: 5 },
-        });
-
-        // ✅ Create start/end markers
-        const startMarker = new window.H.map.Marker(section.departure.place.location);
-        const endMarker = new window.H.map.Marker(section.arrival.place.location);
-
-        // ✅ Add all objects to map
-        map.addObjects([routeLine, startMarker, endMarker]);
-
-        // ✅ Auto zoom to fit the route
-        map.getViewModel().setLookAtData({
-          bounds: routeLine.getBoundingBox(),
-        });
-
-        console.log("Route line and markers added to map.");
-      });
-    },
-    (error) => {
-      console.error("Routing error:", error);
-    }
-  );
-};
-
-
-
-
 
 const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<any>(null); // ใช้เก็บ instance ของแผนที่
+  const mapInstanceRef = useRef<any>(null);
+  const startRef = useRef<{ lat: number; lng: number } | null>(null);
+  const endRef = useRef<{ lat: number; lng: number } | null>(null);
+  const routeObjectsRef = useRef<any[]>([]);
+  const [map, setMap] = useState<any>(null);
+  const [ui, setUi] = useState<any>(null);
+  const [markers, setMarkers] = useState<any[]>([]);
+  const [status, setStatus] = useState("กรุณาเลือกจุดเริ่มต้น");
+  const startMarkerRef = useRef<any>(null);
+  const endMarkerRef = useRef<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const router = useRouter();
+  const { start, end } = router.query;
+
+
+  useEffect(() => {
+    // จะรันทุกครั้งที่ start หรือ end เปลี่ยน
+    console.log("start:", start);
+    console.log("end:", end);
+  }, [start, end]);
+
+
+  useEffect(() => {
+    if (start && end && mapInstanceRef.current) {
+      findAndRouteFromId({
+        startId: start,
+        endId: end,
+              map: mapInstanceRef.current,
+              startRef,
+              endRef,
+              startMarkerRef,
+              endMarkerRef,
+              routeObjectsRef,
+        apiKey: 'fAnmdyEh8EyRxpTms7faftupQenGyqHL63ckLKQRDKc',
+      });
+    }
+  }, [start, end, mapInstanceRef.current]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -134,14 +116,13 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         console.log('Start loading HERE Maps SDK...');
         await loadHereMaps();
         await waitForHereSDK();
-        await waitForHereUI();  // ตรวจสอบว่า UI พร้อมใช้งาน
+        await waitForHereUI();
 
         console.log('HERE Maps SDK loaded successfully');
 
-        // ตรวจสอบว่า mapInstanceRef ถูกกำหนดแล้วหรือยัง
         if (mapInstanceRef.current) {
           console.log('Reusing the existing map instance');
-          return; // ถ้ามีแผนที่แล้วไม่สร้างใหม่
+          return;
         }
 
         const platform = new window.H.service.Platform({
@@ -159,18 +140,8 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
           }
         );
 
-        mapInstanceRef.current = map;  // เก็บแผนที่ที่สร้างใน ref
-        
-        //Route
-        createPedestrianRoute(
-          mapInstanceRef.current,
-          platform,
-          { lat: 13.6534596, lng: 100.4949939 },  // จุด A
-          { lat: 13.6502076, lng: 100.4919385 }   // จุด B
-        );
+        mapInstanceRef.current = map;
 
-        
-        // ฟังก์ชันรีไซส์เมื่อหน้าจอเปลี่ยนขนาด
         window.addEventListener('resize', () => map.getViewPort().resize());
 
         // เปิดใช้งานการโต้ตอบกับแผนที่
@@ -180,54 +151,68 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
 
         // UI เริ่มต้น
         const ui = window.H.ui.UI.createDefault(map, defaultLayers);
+        setMap(map);
+        setUi(ui);
 
+        // สร้างปุ่มกลับมาที่ center
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.position = 'fixed';
+        buttonContainer.style.bottom = '20px';
+        buttonContainer.style.left = '20px';
+        buttonContainer.style.zIndex = '3000';
+        buttonContainer.innerHTML = `
+          <div style="
+            background-color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: background-color 0.2s;
+          ">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" 
+                fill="#1a73e8"/>
+            </svg>
+          </div>
+        `;
+
+        // เพิ่ม event listener สำหรับการคลิกปุ่ม
+        buttonContainer.addEventListener('click', () => {
+          map.getViewModel().setLookAtData({
+            position: { lat: 13.651287687026441, lng: 100.494473986665 },
+            zoom: 17.5
+          }, true);
+        });
+
+        // เพิ่ม hover effect
+        buttonContainer.addEventListener('mouseover', () => {
+          const div = buttonContainer.querySelector('div');
+          if (div) div.style.backgroundColor = '#f8f9fa';
+        });
+        buttonContainer.addEventListener('mouseout', () => {
+          const div = buttonContainer.querySelector('div');
+          if (div) div.style.backgroundColor = 'white';
+        });
+
+        // เพิ่มปุ่มลงในแผนที่
+        mapRef.current?.appendChild(buttonContainer);
+
+        console.log("Add center button", buttonContainer);
+
+        // ดึงข้อมูลตำแหน่งจาก API
         const locationData : any = await getLocation({flag_valid: true})
         console.log("locationData", locationData.data)
-
-        const latCenter = locationData.data[0].lat
-        const lngCenter = locationData.data[0].long;
+        setMarkers(locationData.data);
+        
+        console.log("New center:", map.getCenter());
         map.setCenter({ lat: 13.651287687026441 , lng: 100.494473986665 }, true);
 
-        const defaultCenter = { lat: latCenter, lng: lngCenter };
+        // const defaultCenter = { lat: latCenter, lng: lngCenter };
 
-        // --- ใส่ event ที่นี่เลย ---
-        map.addEventListener('mapviewchangeend', () => {
-          const currentCenter = map.getCenter();
-
-          const distanceLat = Math.abs(currentCenter.lat - defaultCenter.lat);
-          const distanceLng = Math.abs(currentCenter.lng - defaultCenter.lng);
-
-          const threshold = 0.005;
-          if (distanceLat > threshold || distanceLng > threshold) {
-            console.log('ดึงกลับมาที่ศูนย์กลาง');
-            map.setCenter(defaultCenter, true);
-          }
-        });
-
-
-        const markers = locationData.data
-
-        console.log("markers", markers)
-
-        // เพิ่ม marker บนแผนที่
-        // const markers = [
-        //   { lat: 13.652020693665033, lng: 100.49147180132398, info: 'จุดที่ 1' },
-        //   { lat: 13.64800363730579, lng: 100.49356857256268, info: 'จุด2' }
-        // ];
-
-        markers.forEach(({ lat, long, location_id, location_name }) => {
-            const marker = new window.H.map.Marker({ lat, lng: long });
-
-          if (location_name) {
-            marker.setData(location_name);
-            marker.addEventListener('tap', evt => {
-              console.log(location_name);
-            //   onShowModal(<p>{location_name}</p>);
-            //   onLocationSelect(parseInt(location_id))
-            });
-          }
-          map.addObject(marker);
-        });
 
       } catch (error) {
         console.error('Error loading HERE Maps:', error);
@@ -245,8 +230,30 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
     };
   }, []);
 
+  const handleRouteSubmit = (start, end) => {
+    // ตัวอย่าง: redirect หรือ set state
+    window.location.href = `/map?start=${start}&end=${end}`;
+  };
+
   return (
-    <div ref={mapRef} style={{ display: 'flex', width: '100vw', height: '93.7vh' }} />
+    <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+      <div ref={mapRef} style={{ position: 'relative', width: '100vw', height: '100vh' }} />
+      <button
+        onClick={() => setModalOpen(true)}
+        style={{
+          position: "fixed", right: 80, bottom: 40, zIndex: 1001,
+          width: 56, height: 56, borderRadius: "50%", background: "#34c759",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)", border: "none", cursor: "pointer"
+        }}
+      >
+        <span style={{ fontSize: 32, color: "#fff" }}>+</span>
+      </button>
+      <MapRouteModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleRouteSubmit}
+      />
+    </div>
   );
 };
 
