@@ -172,7 +172,7 @@ export function MainLinks() {
     const handleProfile = () => {
         console.log("Opening profile...");
         setIsDropdownOpen(false);
-        // router.push("/profile");
+        router.push("/profile");
     };
 
 
@@ -254,18 +254,21 @@ export function MainLinks() {
                 )}
 
                 {token ? (
-                    <Image
-                        src={token.profile_image || ""}
-                        alt="profile"
-                        width={38}
-                        height={40}
-                        className="border-2 mr-3"
-                        style={{
-                            borderRadius: "50%",
-                            marginLeft: isLargerThanSm ? '10px' : '0'
-                        }}
-                        onClick={toggleDropdown}
-                    />
+                    <div className="flex">
+                        <Image
+                            src={token.profile_image || ""}
+                            alt="profile"
+                            width={38}
+                            height={40}
+                            className="border-2 mr-3"
+                            style={{
+                                borderRadius: "50%",
+                                marginLeft: isLargerThanSm ? '10px' : '0'
+                            }}
+                            onClick={toggleDropdown}
+                        />
+                        {/* <p className="mt-2 text-sm">{token.username}</p> */}
+                    </div>
                 ) : (
                     <Image
                         src="/saveee.png"

@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
 import RegisterPage from "@/comps/auth/register/registerPage"
 import { NotificationProvider } from "@/comps/noti/notiComp";
+import Head from 'next/head';
 
 // import { getUser } from "@/utils/api/userData"
 
@@ -17,7 +18,7 @@ function PageContent() {
 
     return (
         <div className="bg-[#343434] w-full h-full">
-            <RegisterPage/>
+            <RegisterPage />
         </div>
         // <>
         //     {canRead && (
@@ -31,10 +32,17 @@ function PageContent() {
 
 
 export default function Register() {
-    
+
     return (
-        <NotificationProvider>
-            <PageContent></PageContent>
-        </NotificationProvider>
+        <>
+            <Head>
+                <title>Register</title>
+                <meta name="description" content="Register Page" />
+            </Head>
+            
+            <NotificationProvider>
+                <PageContent></PageContent>
+            </NotificationProvider>
+        </>
     );
 }
