@@ -6,6 +6,7 @@ import { getUserDestinationLocation } from './getUserDestinationLocation';
 import { createPedestrianRoute } from './PedestrianRoute';
 import { selectRouteFromCurrentLocation } from './selectRouteFromCurrentLocation';
 import { setupInitialMarkers } from './handleMarkerSelection';
+import { routeToLocation } from './routeToLocation';
 // ฟังก์ชันโหลด script แบบเรียงลำดับ
 function loadScriptSequentially(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -67,7 +68,7 @@ async function waitForHereSDK(retries = 10, delay = 300): Promise<void> {
 
 interface HereMapProps {
   onShowModal?: (content: React.ReactNode) => void;
-  onLocationSelect?: (location_id: number) => void; // เพิ่มตรงนี้
+  onLocationSelect?: (callback: (location_id: number) => void) => void;
 }
 
 const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
@@ -83,6 +84,39 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
   const startMarkerRef = useRef<any>(null);
   const endMarkerRef = useRef<any>(null);
 
+
+        //Input location_id to userlocation
+        const handleLocationSelect = async (location_id: number) => {
+          if (!mapInstanceRef.current) return;
+      
+          try {
+            await routeToLocation({
+              map: mapInstanceRef.current,
+              location_id,
+              setStatus,
+              startRef,
+              endRef,
+              startMarkerRef,
+              endMarkerRef,
+              routeObjectsRef,
+            });
+          } catch (error) {
+            console.error('Error handling location selection:', error);
+            setStatus('เกิดข้อผิดพลาดในการสร้างเส้นทาง');
+          }
+        };
+      
+        // ย้ายการเรียก handleLocationSelect ไปอยู่ใน useEffect
+        useEffect(() => {
+          // เรียกเมื่อ component mount และ map พร้อมใช้งาน
+          if (mapInstanceRef.current) {
+            handleLocationSelect(5); // inputlocationid
+          }
+        }, [mapInstanceRef.current]); // เรียกเมื่อ mapInstanceRef.current เปลี่ยน
+
+
+
+
   const tryCreateRoute = () => {
     if (startRef.current && endRef.current && mapInstanceRef.current) {
       const platform = new window.H.service.Platform({
@@ -96,8 +130,7 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
       end: endRef.current,
       routeObjectsRef,
     });
-  }
-};
+  }}
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -158,7 +191,6 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         // const defaultCenter = { lat: latCenter, lng: lngCenter };
 
 
-
         // ===== ฟังก์ชันสำหรับเลือกเส้นทาง =====
         // ฟังก์ชันที่ 1: เลือกจุดเริ่มต้นและจุดสิ้นสุดเอง
         // setupInitialMarkers({
@@ -174,21 +206,22 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         // });
 
         // ฟังก์ชันที่ 2: เลือกเฉพาะจุดสิ้นสุด (เริ่มต้นจากตำแหน่งปัจจุบัน)
-        selectRouteFromCurrentLocation({
-          map: mapInstanceRef.current,
-          setStatus,
-          tryCreateRoute,
-          startRef,
-          endRef,
-          startMarkerRef,
-          endMarkerRef,
-        });
-        // ===== จบส่วนของฟังก์ชันสำหรับเลือกเส้นทาง =====
+        // selectRouteFromCurrentLocation({
+        //   map: mapInstanceRef.current,
+        //   setStatus,
+        //   tryCreateRoute,
+        //   startRef,
+        //   endRef,
+        //   startMarkerRef,
+        //   endMarkerRef,
+        // });
 
-        const markers = locationData.data
-        console.log("markers", markers)
+
 
         // เพิ่ม markers ลงแผนที่
+        const markers = locationData.data;
+        console.log("markers", markers);
+
         if (markers.length > 0) {
           addMarkersToMap(map, ui, markers, {
             setStatus,
