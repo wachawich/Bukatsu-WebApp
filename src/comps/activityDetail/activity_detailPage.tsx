@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { getActivity, ActivityField } from "@/utils/api/activity";
+import { getActivity, ActivityField ,updateActivity} from "@/utils/api/activity";
 import { fetchDataApi } from "@/utils/callAPI";
 import Image from 'next/image';
 import Heart from "./Heart";
 import { IconCameraPin, IconClock } from '@tabler/icons-react'; 
 import { useRouter } from "next/router";
-import { Dialog } from '@headlessui/react';
-import FormPreview from '@/comps/form/form-builder/form-preview';
-
 
 type ExtendedActivityField = ActivityField & {
   activity_type_data?: {
@@ -48,45 +45,79 @@ const ActivityDetail: React.FC = () => {
   const [creator, setCreator] = useState<UserField | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { activity_id, submitted } = router.query; 
+  const { activity_id, submitted, edit } = router.query;
   const isSubmitted = submitted === "true"; 
-
+  const [editing, setEditing] = useState(false);
+   const [formData, setFormData] = useState<ActivityField | null>(null);
+  const [locations, setLocations] = useState<{ location_id: string; location_name: string }[]>([]);
+  const isEditMode = edit === "true";
   // const [isFormOpen, setIsFormOpen] = useState(false); 
   // const [isSubmitted, setIsSubmitted] = useState(false);
   
-
   useEffect(() => {
-  const fetchActivity = async () => {
-    if (!activity_id) return;
+      if (edit === "true") {
+        setEditing(true);
+      } else {
+        setEditing(false);
+      }
+    }, [edit]);
+    useEffect(() => {
+    const fetchActivity = async () => {
+      if (!activity_id) return;
 
     try {
       const response = await getActivity({ activity_id: Number(activity_id) });
       const result = response.data;
 
-      if (Array.isArray(result) && result.length > 0) {
-        const activityData = result[0];
-        setActivity(activityData);
+        if (Array.isArray(result) && result.length > 0) {
+            const activityData = result[0];
+            setActivity(activityData);
+            setFormData(activityData);
 
-        if (activityData.create_by) {
-          const userRes = await getUser({ user_sys_id: activityData.create_by });
-          if (Array.isArray(userRes?.data) && userRes.data.length > 0) {
-            setCreator(userRes.data[0]);
+
+          if (activityData.create_by) {
+            const userRes = await getUser({ user_sys_id: activityData.create_by });
+            if (Array.isArray(userRes?.data) && userRes.data.length > 0) {
+              setCreator(userRes.data[0]);
+            }
           }
         }
+      } catch (error) {
+        console.error("Error fetching activity or user:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching activity or user:", error);
-    } finally {
-      setLoading(false);
+    };
+
+    fetchActivity();
+  }, [activity_id]);
+
+  useEffect(() => {
+      const fetchLocations = async () => {
+        const res = await fetchDataApi("POST", "location.get", {});
+        if (Array.isArray(res?.data)) {
+          setLocations(res.data);
+        }
+      };
+      fetchLocations();
+    }, []);
+
+    const handleSave = async () => {
+    if (!formData) return;
+    try {
+      await updateActivity({ ...formData, activity_id: activity?.activity_id });
+      alert("อัปเดตข้อมูลสำเร็จ");
+      setEditing(false);
+      router.replace(`/activity_detail?activity_id=${activity?.activity_id}`);
+    } catch (err) {
+      console.error("Error updating activity:", err);
+      alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
     }
   };
 
-  fetchActivity();
-}, [activity_id]);
-
 
   if (loading) return <p className="text-center">กำลังโหลดข้อมูล...</p>;
-  if (!activity) return <p className="text-center text-red-500">ไม่พบกิจกรรม</p>;
+  if (!activity || !formData) return <p className="text-center text-red-500">ไม่พบกิจกรรม</p>;
 
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto ">
@@ -104,7 +135,7 @@ const ActivityDetail: React.FC = () => {
             />
         </div>
       
-        <div className="text-center mt-6">
+        <div className="text-center mt-8 ">
           {((activity.activity_type_data?.length ?? 0) > 0 || (activity.activity_type_data?.length ?? 0)  > 0) && (
               <div className="mb-4">
                 <div className="flex flex-wrap gap-2 justify-center items-center">
@@ -127,10 +158,23 @@ const ActivityDetail: React.FC = () => {
                 </div>
               </div>
             )}
-        
-          <h1 className="text-2xl sm:text-4xl font-bold text-blue-900">{activity.title}</h1>
+
+          <div >
+           <h1 className=" text-2xl sm:text-4xl font-bold text-blue-900">
+            {editing ? (
+              <input
+                type="text"
+                value={formData.title || ""}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="border p-2 rounded w-full"
+              />
+            ) : (
+              activity.title
+            )}
+          </h1>
+          </div>
           <div className="flex items-center justify-center text-gray-500 text-sm gap-2">
-            <IconClock  size={18} className="text-orange-500 mt-3 mb-4" />
+            <IconClock  size={18} className="text-orange-500 mt-2 mb-4" />
             <p className="text-sm text-gray-500 mt-2 mb-4">
               โพสต์เมื่อ {new Date(activity.create_date).toLocaleDateString("th-TH", {
                 day: "2-digit",
@@ -138,7 +182,7 @@ const ActivityDetail: React.FC = () => {
                 year: "numeric"
               })}
               {creator && (
-                <span className="ml-6 text-gray-700">
+                <span className="ml-6 text-gray-500">
                   โดย {creator.username }
                 </span>
               )}
@@ -150,109 +194,157 @@ const ActivityDetail: React.FC = () => {
         
  
         <div className="p-4">
-         <p style={{ textIndent: "2rem" }} className="mb-2 p-7 text-base leading-relaxed">
-          {activity.description}
-        </p>
+          <div>
+            
+            {editing ? (
+              <textarea
+                value={formData.description || ""}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="border p-2 rounded w-full h-full"
+              />
+            ) : (
+              <p style={{ textIndent: "2rem" }} className="mb-2 p-7 text-base leading-relaxed">
+                {activity.description}
+              </p>
+            )}
+          </div>
 
           <div className="p-6"> 
           <div className="bg-blue-50 border-l-4 border-blue-400 p-8 mb-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-semibold text-blue-800 mb-2">รายละเอียดกิจกรรม</h2>
             <ul className="list-disc ml-5 space-y-1 text-gray-700">
-              <li><strong>จำนวนที่รับ:</strong> {activity.user_count ?? "ไม่ระบุ"}</li>
-              <li><strong>ค่าใช้จ่าย:</strong> {activity.price ?? 0} บาท</li>
-              <li><strong>สถานที่:</strong> {activity.location_name}</li>
-              <li><strong>ระยะเวลาการเปิดรับสมัคร:</strong>{" "}
-                {new Date(activity.start_date).toLocaleDateString("th-TH", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric"
-                })} -{" "}
-                {new Date(activity.end_date).toLocaleDateString("th-TH", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric"
-                })}
+              <li>
+                <strong>จำนวนที่รับ:</strong>{" "}
+                {editing ? (
+                  <input
+                    type="number"
+                    value={formData.user_count || ""}
+                    onChange={(e) => setFormData({ ...formData, user_count: e.target.value })}
+                    className="border p-1 rounded w-32"
+                  />
+                ) : (
+                  activity.user_count ?? "ไม่ระบุ"
+                )}
+              </li>
+              <li>
+                <strong>ค่าใช้จ่าย:</strong>{" "}
+                {editing ? (
+                  <input
+                    type="number"
+                    value={formData.price || ""}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="border p-1 rounded w-32"
+                  />
+                ) : (
+                  `${activity.price ?? 0} บาท`
+                )}
+              </li>
+              <li>
+                <strong>สถานที่:</strong>{" "}
+                {editing ? (
+                  <select
+                    value={formData.location_id || ""}
+                    onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
+                    className="border p-2 rounded"
+                  >
+                    {locations.map((loc) => (
+                      <option key={loc.location_id} value={loc.location_id}>
+                        {loc.location_name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  activity.location_name
+                )}
+              </li>
+              <li>
+                <strong>ระยะเวลา:</strong>{" "}
+                {editing ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={formData.start_date || ""}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      className="border p-1 rounded"
+                    />
+                    ถึง
+                    <input
+                      type="date"
+                      value={formData.end_date || ""}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                      className="border p-1 rounded"
+                    />
+                  </div>
+                ) : (
+                  `${new Date(activity.start_date).toLocaleDateString("th-TH")} - ${new Date(activity.end_date).toLocaleDateString("th-TH")}`
+                )}
               </li>
             </ul>
 
-            {activity.remark && (
-              <>
-                <h2 className="text-xl font-semibold text-blue-800 mb-2">หมายเหตุ</h2>
-                <p className="ml-5 text-gray-700">{activity.remark}</p>
-              </>
-            )}
-
-            {activity.contact && (
-              <>
-                <h2 className="text-xl font-semibold text-blue-800 mb-2">ติดต่อสอบถาม</h2>
-                <p className="ml-5 text-gray-700">{activity.contact}</p>
-              </>
-            )}
-
-
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold text-blue-800 mb-2">หมายเหตุ</h2>
+              {editing ? (
+                <textarea
+                  value={formData.remark || ""}
+                  onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
+                  className="border p-2 rounded w-full"
+                />
+              ) : (
+                <p>{activity.remark}</p>
+              )}
+            </div>
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold text-blue-800 mb-2">ติดต่อสอบถาม</h2>
+              {editing ? (
+                <input
+                  type="text"
+                  value={formData.contact || ""}
+                  onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                  className="border p-2 rounded w-full"
+                />
+              ) : (
+                <p>{activity.contact}</p>
+              )}
+            </div>
           </div>
           </div>  
 
+<div className="p-6">
+            <p>location</p>
+            {!editing && (
+              <div className="flex flex-wrap justify-center items-center gap-4 ">
+                <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md transition">
+                  <IconCameraPin size={20} />
+                  <a>ค้นหาสถานที่</a>
+                </button>
+                {activity.activity_json_form && (
+                  <a
+                    href={`/activity_register?activity_id=${activity_id}`}
+                    className={`px-4 py-2 rounded-md shadow transition text-white ${
+                      isSubmitted ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                  >
+                    {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
+                  </a>
+                )}
+              </div>
+            )}
 
-          <p>location</p>
-          
-         
-
-          <div className="flex flex-wrap justify-center items-center gap-4 ">
-          <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md  transition">
-           <IconCameraPin size={20} />
-            <a>ค้นหาสถานที่</a>
-          </button>
-
-          {activity.activity_json_form && (
-              // <button
-              //   onClick={() => setIsFormOpen(true)}
-              //   className={`px-4 py-2 rounded-md shadow transition text-white ${
-              //     isSubmitted ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-              //   }`}
-              //   disabled={isSubmitted}
-              // >
-              //   {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
-              // </button>
-              <a 
-            href={`/activity_register?activity_id=${activity_id}`} 
-            className={`px-4 py-2 rounded-md shadow transition text-white ${
-                isSubmitted ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-        >
-            {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
-        </a>
+            {editing && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={handleSave}
+                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
+                >
+                  บันทึกข้อมูล
+                </button>
+              </div>
             )}
           </div>
+
         </div>
+       
       </div>
-
-      
-
-      {/* <Dialog open={isFormOpen} onClose={() => setIsFormOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded bg-white p-6">
-            <Dialog.Title className="text-xl font-bold mb-4">สมัครเข้าร่วมกิจกรรม</Dialog.Title>
-
-            {activity.activity_json_form && (
-              <FormPreview
-                form={activity.activity_json_form}
-                onSubmitSuccess={() => {
-                  setIsSubmitted(true); 
-                  setIsFormOpen(false); 
-                }}
-              />
-            )}
-
-            <div className="mt-4 text-right">
-              <button onClick={() => setIsFormOpen(false)} className="text-sm text-gray-600 hover:text-gray-800">
-                ปิด
-              </button>
-            </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog> */}
     </div>
   );
 };

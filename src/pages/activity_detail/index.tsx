@@ -3,6 +3,7 @@ import Link from 'next/link';
 import LayoutShell from "@/comps/layouts/LayoutShell";
 import ActivityDetail from "@/comps/activityDetail/activity_detailPage"
 import Recommended from "@/comps/activityDetail/recommend";
+import Footer from "@/comps/Footer/Footer";
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -19,6 +20,7 @@ function PageContent() {
             <div className='p-4 sm:p-6 max-w-6xl mx-auto'>
             <Recommended />
             </div>
+            <Footer/>
           
         </div>
         // <>

@@ -6,12 +6,12 @@ import Heart from "./Heart";
 const Recommended: React.FC = () => {
   const [activities, setActivities] = useState<ActivityField[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        // ทดลองดึง id 37
-        const response = await getActivity({ activity_id: 37 }); 
+        const response = await getActivity({ flag_valid: true });
         const result = response.data;
         if (Array.isArray(result)) {
           setActivities(result.slice(0, 8));
@@ -25,17 +25,30 @@ const Recommended: React.FC = () => {
 
     fetchActivities();
   }, []);
+   useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % activities.length);
+    }, 3000); 
+
+    return () => clearInterval(interval);
+  }, [activities.length]);
 
   if (loading) return <p className="text-center">กำลังโหลดกิจกรรม...</p>;
 
   return (
     <section className="overflow-hidden">
       <div className="flex items-center mb-4">
-        <h2 className="text-3xl mr-4 whitespace-nowrap">กิจกรรมที่เกี่ยวข้อง</h2>
+        <h2 className="text-3xl mr-4 whitespace-nowrap text-blue-800">กิจกรรมที่เกี่ยวข้อง</h2>
         <div className="flex-grow h-0.5 bg-blue-200"></div>
       </div>
 
       <div className="flex space-x-4 overflow-x-auto pb-4">
+        <div
+          className="flex transition-transform duration-700 ease-in-out"
+          style={{
+            transform: `translateX(-${currentSlide * 300}px)`, 
+          }}
+        ></div>
         {activities.map((activity, index) => (
           <div
             key={index}
