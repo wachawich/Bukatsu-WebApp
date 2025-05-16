@@ -1,8 +1,9 @@
 import React from 'react'
-
+import Link from 'next/link';
 import LayoutShell from "@/comps/layouts/LayoutShell";
-
-import MyActivityPage from '@/comps/myActivity/myActPage';
+import ActivityDetail from "@/comps/activityDetail/activity_detailPage"
+import Recommended from "@/comps/activityDetail/recommend";
+import Footer from "@/comps/Footer/Footer";
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -13,8 +14,13 @@ function PageContent() {
     // );
 
     return (
-        <div className="bg-white w-full h-full pt-14">
-            <MyActivityPage/>
+        <div className="bg-gray-100 w-full min-h-screen pt-14 overflow-auto">
+            <ActivityDetail/>
+            <div className='p-4 sm:p-6 max-w-6xl mx-auto'>
+            <Recommended />
+            </div>
+            <Footer/>
+          
         </div>
         // <>
         //     {canRead && (
