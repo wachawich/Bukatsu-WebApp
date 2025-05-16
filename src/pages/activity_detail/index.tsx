@@ -1,12 +1,8 @@
-import React, {useEffect, useState} from 'react'
-
+import React from 'react'
+import Link from 'next/link';
 import LayoutShell from "@/comps/layouts/LayoutShell";
-
-import Homepage from "@/comps/homepage/home"
-
-import { getUser } from "@/utils/api/userData"
-import Clubpage from '@/comps/clubpage/club';
-
+import ActivityDetail from "@/comps/activityDetail/activity_detailPage"
+import Recommended from "@/comps/activityDetail/recommend";
 import Footer from "@/comps/Footer/Footer";
 
 function PageContent() {
@@ -17,11 +13,16 @@ function PageContent() {
     //     "check_in"
     // );
 
+
     return (
-        <div className="bg-white text-black w-full overflow-x-hidden h-full pt-14">
-            <Clubpage/>
+        <div className="bg-gray-100 w-full min-h-screen pt-14 overflow-auto">
+            <ActivityDetail/>
+            <div className='p-4 sm:p-6 max-w-6xl mx-auto'>
+            <Recommended />
+            </div>
             <Footer/>
-        </div>  
+          
+        </div>
         // <>
         //     {canRead && (
         //         <div className="fadeIn-animation">
@@ -33,7 +34,7 @@ function PageContent() {
 }
 
 
-export default function Club() {
+export default function ActivityDetails() {
     return (
         <>
             <LayoutShell>

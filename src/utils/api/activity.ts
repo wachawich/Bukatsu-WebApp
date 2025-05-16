@@ -13,7 +13,7 @@ export interface ActivityField {
     price?: number;
     user_property?: string;
     remark?: string;
-    create_by?: string;
+    create_by?: number;
     location_id?: number;
     location_name?: string;
     location_type?: string;

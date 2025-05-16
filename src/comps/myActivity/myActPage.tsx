@@ -71,7 +71,7 @@ const MyActivityPage: React.FC = () => {
 
     const filterByCategory = (activities: ActivityField[]) => {
         const today = new Date();
-        return activities.filter((activity) => {
+        return activities.filter((activity : any) => {
             const start = new Date(activity.start_date);
             const end = new Date(activity.end_date);
             switch (activeCategory) {
@@ -128,7 +128,7 @@ const MyActivityPage: React.FC = () => {
     };
 
     return (
-        <div className="bg-white max-w-4xl mx-auto my-6 px-4 py-10 relative border shadow-xl md:px-20 sm:px-8 sm:rounded-2xl">
+        <div className="bg-white max-w-4xl mx-auto my-6 px-4 py-10 relative border shadow-xl md:px-20 sm:px-8 sm:rounded-2xl h-full">
 
             <h1 className="text-2xl font-bold mb-4">My Activity</h1>
 
@@ -136,7 +136,7 @@ const MyActivityPage: React.FC = () => {
                 <button
                     className={`w-1/2 px-6 py-2 text-xs md:text-base font-medium transition ${activeTab === "myActivity"
                         ? 'bg-orange-500 text-white'
-                        : 'bg-black text-white hover:bg-gray-100'
+                        : 'bg-orange-400 text-white hover:bg-orange-300'
                         }`}
                     onClick={() => setActiveTab("myActivity")}
                 >
@@ -145,7 +145,7 @@ const MyActivityPage: React.FC = () => {
                 <button
                     className={`w-1/2 px-6 py-2 text-xs md:text-base font-medium transition ${activeTab === "createActivity"
                         ? 'bg-orange-500 text-white'
-                        : 'bg-black text-white hover:bg-gray-100'
+                        : 'bg-orange-400 text-white hover:bg-orange-300'
                         }`}
                     onClick={() => setActiveTab("createActivity")}
                 >
