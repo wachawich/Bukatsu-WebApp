@@ -2,7 +2,7 @@ import React from 'react'
 
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
-import CalendarPage from '@/comps/calendar/calendarPage';
+import CalendarPage from '@/comps/calendar/CalendarPage';
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);

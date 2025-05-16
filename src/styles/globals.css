@@ -15,8 +15,8 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: '#000000';
+  background: '#ffffff';
   font-family: "Noto Sans Thai", sans-serif;
   height: 100vmin;
 }

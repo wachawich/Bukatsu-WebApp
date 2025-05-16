@@ -40,6 +40,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [token, setToken] = useState('');
+  const [loging, setLoging] = useState(false);
 
   // const tokenData = decodeToken();
   const { showNotification } = useNotification();
@@ -49,13 +50,13 @@ const LoginPage = () => {
 
   const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    const token = decodeToken();
+  // useEffect(() => {
+  //   const token = decodeToken();
 
-    if (token) {
-      router.push("/home");
-    }
-  }, []);
+  //   if (token) {
+  //     router.push("/home");
+  //   }
+  // }, []);
 
 
   const handleVerificationComplete = (verified: boolean) => {
@@ -66,37 +67,47 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoging(true);
 
-    console.log('Login attempt:', { email, password, rememberMe });
+    try {
+      console.log('Login attempt:', { email, password, rememberMe });
 
-    const loginField: any = {
-      username: email,
-      password: password
+      const loginField: any = {
+        username: email,
+        password: password
+      };
+
+      // const loginData = await login(loginField);
+      // console.log("loginData", loginData);
+      // console.log("loginData.token", loginData.token);
+      // console.log("loginData.user", loginData.user);
+
+      // if (loginData.success) {
+      //   setUserEmail(loginData.user);
+      //   setToken(loginData.token);
+
+      //   const otpData = await sendOTP({ email: loginData.user });
+
+      //   if (otpData.success) {
+      //     showNotification("Send OTP Success", `${otpData.message}`, "success");
+      //     setOtpPage(true);
+      //   } else {
+      //     showNotification("Send OTP Error", `${otpData.message}`, "error");
+      //   }
+      // } else {
+      //   showNotification("Login failed!", `${loginData.message}`, "error");
+      // }
+
+      // router.push('/dashboard');
+
+    } catch (error) {
+      console.error("Login Error:", error);
+      showNotification("Login Error", "เกิดข้อผิดพลาดระหว่างการเข้าสู่ระบบ", "error");
+    } finally {
+      //setLoging(false); // ปิด loading ไม่ว่าจะสำเร็จหรือ error
     }
-
-    const loginData = await login(loginField)
-
-    console.log("loginData", loginData)
-    console.log("loginData.token", loginData.token)
-    console.log("loginData.user", loginData.user)
-
-    if (loginData.success) {
-      setUserEmail(loginData.user)
-      setToken(loginData.token)
-      const otpData = await sendOTP({ email: loginData.user })
-      if (otpData.success) {
-        showNotification("Send OTP Success", `${otpData.message}`, "success");
-        setOtpPage(true)
-      } else {
-        showNotification("Send OTP Error", `${otpData.message}`, "error");
-      }
-    } else {
-      showNotification("Login failed!", `${loginData.message}`, "error");
-    }
-
-
-    // router.push('/dashboard');
   };
+
 
   const isLargerThanSm = useMediaQuery("(min-width: 768px)");
 
@@ -236,18 +247,28 @@ const LoginPage = () => {
                   </label>
                 </div>
                 <div className="text-sm">
-                  <Link href="/forgot-password" className="text-blue-500 hover:text-blue-600">
+                  <Link href="/resetpassword" className="text-blue-500 hover:text-blue-600">
                     Forgot Password?
                   </Link>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Login
-              </button>
+
+              {loging ? (
+                <div className='w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                  Loging...
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Login
+                  </button>
+                </>
+              )}
             </form>
 
             <div className="mt-4 text-center">

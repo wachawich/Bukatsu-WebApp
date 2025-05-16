@@ -4,6 +4,7 @@ import LayoutShell from "@/comps/layouts/LayoutShell";
 
 import LoginPage from "@/comps/auth/login/loginPage"
 import { NotificationProvider } from "@/comps/noti/notiComp";
+import Head from 'next/head';
 
 // import { getUser } from "@/utils/api/userData"
 
@@ -32,8 +33,15 @@ function PageContent() {
 
 export default function Login() {
     return (
-        <NotificationProvider>
-            <PageContent></PageContent>
-        </NotificationProvider>
+        <>
+            <Head>
+                <title>Login</title>
+                <meta name="description" content="Register Page" />
+            </Head>
+
+            <NotificationProvider>
+                <PageContent></PageContent>
+            </NotificationProvider>
+        </>
     );
 }

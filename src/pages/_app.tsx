@@ -7,8 +7,6 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router.js";
 import { setTimeout } from "timers";
-// import { LoadingProvider } from "@/comps/loading/LoadingContext";
-// import LoadingComponent from "@/comps/loading/LoadingComponent";
 import { SessionProvider, signOut } from "next-auth/react";
 import Script from "next/script.js";
 import { decodeToken } from "@/utils/auth/jwt";
@@ -26,7 +24,6 @@ const App = ({
     const [isRefreshingToken, setIsRefreshingToken] = useState(true);
     const [isRender, setIsRender] = useState(false);
 
-    //const { showNotification } = useNotification();
 
     const router = useRouter();
 
@@ -36,25 +33,21 @@ const App = ({
         setToken(token)
     }, []);
 
-    // useEffect(() => {
-    //     const storedToken = localStorage.getItem("authToken");
-    //     setToken(storedToken);
-    // }, []);
-
-    // useEffect(() => {
-    //     if (!(router.pathname === "/login" || router.pathname === "/redirect_in")) {
-    //         signOut({ redirect: false });
-    //     }
-    // }, [token, router.pathname, hasToken]);
 
     useEffect(() => {
         if (
-            token ||
-            router.pathname === "/auth/login" ||
-            router.pathname === "/auth/register"
+            token
         ) {
             setHasToken(true);
             setIsRender(true);
+        } else if (
+            token &&
+            (router.pathname === "/auth/login" || router.pathname === "/auth/register")
+        ) {
+            setHasToken(true);
+            setIsRender(true);
+
+            router.push("/home");
         } else if (
             router.pathname === "/home" ||
             router.pathname === "/calendar" ||
@@ -81,24 +74,19 @@ const App = ({
         }
     }, [token, router.pathname, hasToken]);
 
-    // useEffect(() => {
-    //     function redirectToLogin(token: string | null, pathname: string) {
-    //         // You can add logic here if needed
-    //     }
-
-    //     if (router.isReady && router.pathname && router.pathname !== "/login") {
-    //         redirectToLogin(token, router.pathname);
-    //     }
-    // }, [router.isReady, router.pathname]);
-
     return (
         <>
             <Head>
+                <title>Bukatsu</title>
                 <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
                 <meta name="HandheldFriendly" content="true" />
-                <link rel="icon" href="/resource/logo-xs.png" />
+                <link rel="icon" href="/BukatsuLogoV2.png" />
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" />
+                <meta property="og:image" content="/BukatsuLogoV2.png" />
+                <meta property="og:image:type" content="image/png" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
                 <link
                     href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap"
                     rel="stylesheet"

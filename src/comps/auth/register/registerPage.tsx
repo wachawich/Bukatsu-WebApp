@@ -59,6 +59,15 @@ const RegisterPage = () => {
     const [error, setError] = useState('');
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
+    const [gender, setGender] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [optionsRole, setOptionsRole] = useState([]);
+    const [optionsSubject, setOptionsSubject] = useState([]);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [activityType, setActivityType] = useState<ActivityType[]>([]);
+    const [selectedSubjects, setSelectedSubjects] = useState<SelectedSubject[]>([]);
+    const [selectedActivityType, setSelectedActivityType] = useState<SelectedActivityType[]>([]);
 
     const [pageRegis, setPageRegis] = useState<number>(0)
     const router = useRouter();
@@ -67,17 +76,36 @@ const RegisterPage = () => {
 
     const { showNotification } = useNotification();
 
-    useEffect(() => {
-        const user = decodeToken();
-        
-        if (user) {
-          router.push("/home");
-        }
-      }, []);
+    // useEffect(() => {
+    //     const user = decodeToken();
+
+    //     if (user) {
+    //         router.push("/home");
+    //     }
+    // }, []);
+
+    const optionsGender = [
+        { label: "ชาย", value: "male" },
+        { label: "หญิง", value: "female" },
+        { label: "LGBTQ+", value: "lgbtq" },
+        { label: "ไม่ระบุ", value: "unspecified" },
+    ];
+
+    function convertArrayToIndexedObject<T>(array: T[], key: keyof T): Record<string, number> {
+        const result: Record<string, number> = {};
+
+        array.forEach((item, index) => {
+            const value = item[key];
+            result[index] = typeof value === 'string' || typeof value === 'number'
+                ? parseInt(value as string, 10)
+                : NaN;
+        });
+
+        return result;
+    }
 
     const handleSubmit = async () => {
         // Add authentication logic here
-
 
         if (pageRegis === 0) {
 
@@ -94,7 +122,10 @@ const RegisterPage = () => {
                 if (password !== confirmPassword) {
                     showNotification("Error", "รหัสผ่านไม่ตรงกัน", "error");
                     //setError('รหัสผ่านไม่ตรงกัน');
-                } else if (password === confirmPassword) {
+                } else if (!email.includes("@")) {
+                    showNotification("Invalid Email", "อีเมลต้องมี @", "error");
+                }
+                else if (password === confirmPassword) {
                     setPageRegis(pageRegis + 1)
                     // ส่งข้อมูลต่อไป...
                     console.log('Password OK:', password);
@@ -103,7 +134,7 @@ const RegisterPage = () => {
         }
 
         if (pageRegis === 1) {
-            if (userType === '') {
+            if (userType === '' || gender === '') {
                 showNotification("Input Error", "กรุณากรอกข้อมูลให้ครบ", "error");
             } else {
                 console.log("userType", userType)
@@ -112,62 +143,49 @@ const RegisterPage = () => {
         }
 
         if (pageRegis === 2) {
-            const finalJson : any = await buildJsonForRegis()
-            console.log('finalJson:', finalJson);
+            setIsSubmitting(true);
 
-            const registerData = await register(finalJson)
-            console.log("registerData", registerData)
+            try {
+                const finalJson: any = await buildJsonForRegis();
+                console.log('finalJson:', finalJson);
 
-            if (registerData.success){
-                showNotification("Register Success", "สมัครสมาชิกเสร็จสิ้น", "success");
-                router.push('/auth/login');
-            } else if (!registerData.success){
-                showNotification("Register Error", `${registerData.message}`, "error");
+                // const registerData = await register(finalJson);
+                // console.log("registerData", registerData);
+
+                // if (registerData.success) {
+                //     showNotification("Register Success", "สมัครสมาชิกเสร็จสิ้น", "success");
+                //     router.push('/auth/login');
+                // } else {
+                //     showNotification("Register Error", `${registerData.message}`, "error");
+                // }
+            } catch (error) {
+                //console.error("Register Error:", error);
+                showNotification("Register Error", "เกิดข้อผิดพลาดระหว่างการสมัคร", "error");
+            } finally {
+                setIsSubmitting(false); // ไม่ว่าจะสำเร็จหรือพลาด ให้เปิดปุ่มกลับเสมอ
             }
-            // Redirect after successful login
-            // router.push('/dashboard');
         }
     };
 
 
-    const [optionsRole, setOptionsRole] = useState([]);
-    const [optionsSubject, setOptionsSubject] = useState([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [activityType, setActivityType] = useState<ActivityType[]>([]);
-    const [selectedSubjects, setSelectedSubjects] = useState<SelectedSubject[]>([]);
-    const [selectedActivityType, setSelectedActivityType] = useState<SelectedActivityType[]>([]);
-
-    function convertArrayToIndexedObject<T>(array: T[], key: keyof T): Record<string, number> {
-        const result: Record<string, number> = {};
-    
-        array.forEach((item, index) => {
-            const value = item[key];
-            result[index] = typeof value === 'string' || typeof value === 'number'
-                ? parseInt(value as string, 10)
-                : NaN;
-        });
-    
-        return result;
-    }
-    
-
     const buildJsonForRegis = () => {
         const subjectBlock = convertArrayToIndexedObject(selectedSubjects, 'subject_id');
         const activityBlock = convertArrayToIndexedObject(selectedActivityType, 'activity_type_id');
-      
+
         const finalJson = {
-          email: email,
-          user_first_name : firstname,
-          user_last_name : lastname,
-          password : password,
-          role_id : parseInt(userType),
-          subject : subjectBlock,
-          activity_type : activityBlock,
+            email: email,
+            user_first_name: firstname,
+            user_last_name: lastname,
+            password: password,
+            role_id: parseInt(userType),
+            subject: subjectBlock,
+            activity_type: activityBlock,
+            sex: gender
         };
-      
+
         console.log(finalJson); // หรือ return finalJson;
         return finalJson;
-      };
+    };
 
 
     useEffect(() => {
@@ -178,7 +196,7 @@ const RegisterPage = () => {
 
             console.log("roles", roles.data)
             // แปลงข้อมูลเป็นรูปแบบที่ต้องการ
-            const formattedOptionsRole = roles['data'].map(role => ({
+            const formattedOptionsRole = roles['data'].map((role: any) => ({
                 value: role.role_id,
                 label: role.role_name
             }));
@@ -433,7 +451,7 @@ const RegisterPage = () => {
                                 <div className="text-black">
                                     <p className="mb-2">คุณสมัครใช้งาน bukatsu ในฐานะ:</p>
                                     <div className="flex flex-wrap gap-4 ml-5">
-                                        {optionsRole.map((option) => (
+                                        {optionsRole.map((option : any) => (
                                             <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
                                                 <input
                                                     type="radio"
@@ -442,6 +460,23 @@ const RegisterPage = () => {
                                                     checked={userType === option.value}
                                                     onChange={(e) => setUserType(e.target.value)}
                                                     className="form-radio text-blue-500"
+                                                />
+                                                <span>{option.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+
+                                    <p className="mt-6 mb-2">เพศของคุณคือ:</p>
+                                    <div className="flex flex-wrap gap-4 ml-5">
+                                        {optionsGender.map((option) => (
+                                            <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="gender"
+                                                    value={option.value}
+                                                    checked={gender === option.value}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    className="form-radio text-pink-500"
                                                 />
                                                 <span>{option.label}</span>
                                             </label>
@@ -484,15 +519,23 @@ const RegisterPage = () => {
                                 >
                                     Previous
                                 </button>
-                                <button
-                                    type="submit"
-                                    className="w-[48%] bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    onClick={() => {
-                                        handleSubmit()
-                                    }}
-                                >
-                                    Register
-                                </button>
+                                {isSubmitting ? (
+                                    <div className='w-[48%] flex justify-center bg-gray-500 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2 mt-1"></div>
+                                        Registering...
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="submit"
+                                        className="w-[48%] bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        onClick={() => {
+                                            handleSubmit()
+                                        }}
+                                        disabled={isSubmitting}
+                                    >
+                                        Register
+                                    </button>
+                                )}
                             </div>
                             <div className="mt-4 text-center">
                                 <span className="text-gray-600">Do you have account already?</span>{' '}
