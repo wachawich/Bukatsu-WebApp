@@ -1,12 +1,8 @@
 import React, { useEffect, useRef, useState  } from 'react';
-import { addMarkersToMap, createStartMarker, createEndMarker } from './MarkerUtils';
 import { getLocation } from "@/utils/api/location"
-import { getUserLocationWithMarker } from './getUserLocation';
-import { getUserDestinationLocation } from './getUserDestinationLocation';
-import { createPedestrianRoute } from './PedestrianRoute';
-import { selectRouteFromCurrentLocation } from './selectRouteFromCurrentLocation';
-import { setupInitialMarkers } from './handleMarkerSelection';
-import { routeToLocation } from './routeToLocation';
+import MapRouteModal from "./MapRouteModal"; // ปรับ path ตามจริง
+import { useRouter } from "next/router";
+import { findAndRouteFromId } from "./findAndRouteFromId";
 // ฟังก์ชันโหลด script แบบเรียงลำดับ
 function loadScriptSequentially(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -69,6 +65,7 @@ async function waitForHereSDK(retries = 10, delay = 300): Promise<void> {
 interface HereMapProps {
   onShowModal?: (content: React.ReactNode) => void;
   onLocationSelect?: (callback: (location_id: number) => void) => void;
+  locationId: number;
 }
 
 const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
@@ -83,54 +80,33 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
   const [status, setStatus] = useState("กรุณาเลือกจุดเริ่มต้น");
   const startMarkerRef = useRef<any>(null);
   const endMarkerRef = useRef<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const router = useRouter();
+  const { start, end } = router.query;
 
 
-        //Input location_id to userlocation
-        const handleLocationSelect = async (location_id: number) => {
-          if (!mapInstanceRef.current) return;
-      
-          try {
-            await routeToLocation({
+  useEffect(() => {
+    // จะรันทุกครั้งที่ start หรือ end เปลี่ยน
+    console.log("start:", start);
+    console.log("end:", end);
+  }, [start, end]);
+
+
+  useEffect(() => {
+    if (start && end && mapInstanceRef.current) {
+      findAndRouteFromId({
+        startId: start,
+        endId: end,
               map: mapInstanceRef.current,
-              location_id,
-              setStatus,
               startRef,
               endRef,
               startMarkerRef,
               endMarkerRef,
               routeObjectsRef,
-            });
-          } catch (error) {
-            console.error('Error handling location selection:', error);
-            setStatus('เกิดข้อผิดพลาดในการสร้างเส้นทาง');
-          }
-        };
-      
-        // ย้ายการเรียก handleLocationSelect ไปอยู่ใน useEffect
-        useEffect(() => {
-          // เรียกเมื่อ component mount และ map พร้อมใช้งาน
-          if (mapInstanceRef.current) {
-            handleLocationSelect(10); // inputlocationid
-          }
-        }, [mapInstanceRef.current]); // เรียกเมื่อ mapInstanceRef.current เปลี่ยน
-
-
-
-
-  const tryCreateRoute = () => {
-    if (startRef.current && endRef.current && mapInstanceRef.current) {
-      const platform = new window.H.service.Platform({
-        apikey: 'fAnmdyEh8EyRxpTms7faftupQenGyqHL63ckLKQRDKc',
+        apiKey: 'fAnmdyEh8EyRxpTms7faftupQenGyqHL63ckLKQRDKc',
       });
-
-    createPedestrianRoute({
-      map: mapInstanceRef.current,
-      platform,
-      start: startRef.current,
-      end: endRef.current,
-      routeObjectsRef,
-    });
-  }}
+    }
+  }, [start, end, mapInstanceRef.current]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -180,10 +156,10 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
 
         // สร้างปุ่มกลับมาที่ center
         const buttonContainer = document.createElement('div');
-        buttonContainer.style.position = 'absolute';
+        buttonContainer.style.position = 'fixed';
         buttonContainer.style.bottom = '20px';
         buttonContainer.style.left = '20px';
-        buttonContainer.style.zIndex = '1000';
+        buttonContainer.style.zIndex = '3000';
         buttonContainer.innerHTML = `
           <div style="
             background-color: white;
@@ -206,7 +182,10 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
 
         // เพิ่ม event listener สำหรับการคลิกปุ่ม
         buttonContainer.addEventListener('click', () => {
-          map.setCenter({ lat: 13.651287687026441, lng: 100.494473986665 }, true);
+          map.getViewModel().setLookAtData({
+            position: { lat: 13.651287687026441, lng: 100.494473986665 },
+            zoom: 17.5
+          }, true);
         });
 
         // เพิ่ม hover effect
@@ -222,6 +201,8 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         // เพิ่มปุ่มลงในแผนที่
         mapRef.current?.appendChild(buttonContainer);
 
+        console.log("Add center button", buttonContainer);
+
         // ดึงข้อมูลตำแหน่งจาก API
         const locationData : any = await getLocation({flag_valid: true})
         console.log("locationData", locationData.data)
@@ -232,48 +213,6 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
 
         // const defaultCenter = { lat: latCenter, lng: lngCenter };
 
-
-        // ===== ฟังก์ชันสำหรับเลือกเส้นทาง =====
-        // ฟังก์ชันที่ 1: เลือกจุดเริ่มต้นและจุดสิ้นสุดเอง
-        // setupInitialMarkers({
-        //   map,
-        //   ui,
-        //   locationData: locationData.data,
-        //   setStatus,
-        //   tryCreateRoute,
-        //   startRef,
-        //   endRef,
-        //   startMarkerRef,
-        //   endMarkerRef,
-        // });
-
-        // ฟังก์ชันที่ 2: เลือกเฉพาะจุดสิ้นสุด (เริ่มต้นจากตำแหน่งปัจจุบัน)
-        // selectRouteFromCurrentLocation({
-        //   map: mapInstanceRef.current,
-        //   setStatus,
-        //   tryCreateRoute,
-        //   startRef,
-        //   endRef,
-        //   startMarkerRef,
-        //   endMarkerRef,
-        // });
-
-
-
-        // เพิ่ม markers ลงแผนที่
-        // const markers = locationData.data;
-        // console.log("markers", markers);
-
-        // if (markers.length > 0) {
-        //   addMarkersToMap(map, ui, markers, {
-        //     setStatus,
-        //     tryCreateRoute,
-        //     startRef,
-        //     endRef,
-        //     startMarkerRef,
-        //     endMarkerRef,
-        //   });
-        // }
 
       } catch (error) {
         console.error('Error loading HERE Maps:', error);
@@ -291,9 +230,30 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
     };
   }, []);
 
+  const handleRouteSubmit = (start, end) => {
+    // ตัวอย่าง: redirect หรือ set state
+    window.location.href = `/map?start=${start}&end=${end}`;
+  };
 
   return (
-    <div ref={mapRef} style={{ display: 'flex', width: '100vw', height: '93.7vh' }} />
+    <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+      <div ref={mapRef} style={{ position: 'relative', width: '100vw', height: '100vh' }} />
+      <button
+        onClick={() => setModalOpen(true)}
+        style={{
+          position: "fixed", right: 80, bottom: 40, zIndex: 1001,
+          width: 56, height: 56, borderRadius: "50%", background: "#34c759",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)", border: "none", cursor: "pointer"
+        }}
+      >
+        <span style={{ fontSize: 32, color: "#fff" }}>+</span>
+      </button>
+      <MapRouteModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleRouteSubmit}
+      />
+    </div>
   );
 };
 
