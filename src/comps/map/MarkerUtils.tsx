@@ -57,8 +57,9 @@ export function createEndMarker({ position, map, markerRef }: MarkerParams) {
   }
 
   const redIcon = new window.H.map.Icon(
-    `<svg width="24" height="24" viewBox="0 0 24 24" fill="pink" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="10"/>
+    `<svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 0C8.268 0 2 6.268 2 14c0 9.941 12.09 24.36 12.6 24.96a2 2 0 0 0 2.8 0C17.91 38.36 30 23.941 30 14 30 6.268 23.732 0 16 0z" fill="#00d431"/>
+      <circle cx="16" cy="14" r="6" fill="white"/>
     </svg>`
   );
 
