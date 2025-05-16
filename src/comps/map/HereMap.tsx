@@ -110,7 +110,7 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         useEffect(() => {
           // เรียกเมื่อ component mount และ map พร้อมใช้งาน
           if (mapInstanceRef.current) {
-            handleLocationSelect(5); // inputlocationid
+            handleLocationSelect(10); // inputlocationid
           }
         }, [mapInstanceRef.current]); // เรียกเมื่อ mapInstanceRef.current เปลี่ยน
 
@@ -219,19 +219,19 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
 
 
         // เพิ่ม markers ลงแผนที่
-        const markers = locationData.data;
-        console.log("markers", markers);
+        // const markers = locationData.data;
+        // console.log("markers", markers);
 
-        if (markers.length > 0) {
-          addMarkersToMap(map, ui, markers, {
-            setStatus,
-            tryCreateRoute,
-            startRef,
-            endRef,
-            startMarkerRef,
-            endMarkerRef,
-          });
-        }
+        // if (markers.length > 0) {
+        //   addMarkersToMap(map, ui, markers, {
+        //     setStatus,
+        //     tryCreateRoute,
+        //     startRef,
+        //     endRef,
+        //     startMarkerRef,
+        //     endMarkerRef,
+        //   });
+        // }
 
       } catch (error) {
         console.error('Error loading HERE Maps:', error);
