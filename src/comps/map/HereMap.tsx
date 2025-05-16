@@ -178,14 +178,56 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         setMap(map);
         setUi(ui);
 
+        // สร้างปุ่มกลับมาที่ center
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.position = 'absolute';
+        buttonContainer.style.bottom = '20px';
+        buttonContainer.style.left = '20px';
+        buttonContainer.style.zIndex = '1000';
+        buttonContainer.innerHTML = `
+          <div style="
+            background-color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: background-color 0.2s;
+          ">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" 
+                fill="#1a73e8"/>
+            </svg>
+          </div>
+        `;
+
+        // เพิ่ม event listener สำหรับการคลิกปุ่ม
+        buttonContainer.addEventListener('click', () => {
+          map.setCenter({ lat: 13.651287687026441, lng: 100.494473986665 }, true);
+        });
+
+        // เพิ่ม hover effect
+        buttonContainer.addEventListener('mouseover', () => {
+          const div = buttonContainer.querySelector('div');
+          if (div) div.style.backgroundColor = '#f8f9fa';
+        });
+        buttonContainer.addEventListener('mouseout', () => {
+          const div = buttonContainer.querySelector('div');
+          if (div) div.style.backgroundColor = 'white';
+        });
+
+        // เพิ่มปุ่มลงในแผนที่
+        mapRef.current?.appendChild(buttonContainer);
+
         // ดึงข้อมูลตำแหน่งจาก API
         const locationData : any = await getLocation({flag_valid: true})
         console.log("locationData", locationData.data)
         setMarkers(locationData.data);
-
-        // ตั้งค่าตำแหน่งเริ่มต้นของแผนที่
-        // const latCenter = locationData.data[0].lat
-        // const lngCenter = locationData.data[0].long;
+        
+        console.log("New center:", map.getCenter());
         map.setCenter({ lat: 13.651287687026441 , lng: 100.494473986665 }, true);
 
         // const defaultCenter = { lat: latCenter, lng: lngCenter };
