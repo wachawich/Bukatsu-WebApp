@@ -89,7 +89,6 @@ const CreateActivityPage = () => {
       description: description || '', 
       start_date: startDate,
       end_date: endDate,
-      status,
       contact: contact || '', 
       user_count: userCount !== '' ? Number(userCount) : 0, 
       price: price !== '' ? Number(price) : 0, 
@@ -333,22 +332,6 @@ const CreateActivityPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              สถานะ <span className="text-red-500"></span>
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className={`w-full p-2 border rounded-md ${errors.status ? 'border-red-500' : 'border-gray-300'}`}
-            >
-              <option value="active">active</option>
-              <option value="inactive">inactive</option>
-              <option value="pending">pending</option>
-            </select>
-            {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
               Contact Information
             </label>
             <input
@@ -424,7 +407,7 @@ const CreateActivityPage = () => {
           </div>
 
 
-          <div className="col-span-2">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Remark
             </label>
@@ -432,8 +415,7 @@ const CreateActivityPage = () => {
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
-              rows={2}
-             
+              rows={1}
             />
           </div>
 
