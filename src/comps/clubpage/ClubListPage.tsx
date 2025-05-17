@@ -44,7 +44,7 @@ const ClubListPage: React.FC = () => {
         {clubItems.map((item) => (
           <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden">
             <div className="flex flex-col md:flex-row">
-              <div className="bg-fuchsia-500 text-white min-h-52 w-full md:w-80 flex items-center justify-center">
+              <div className="bg-fuchsia-500 text-white min-h-48 w-full md:w-80 flex items-center justify-center">
                 {item.image ? (
                   <img
                     src={((item.image as { square?: string })?.square) || ''} 

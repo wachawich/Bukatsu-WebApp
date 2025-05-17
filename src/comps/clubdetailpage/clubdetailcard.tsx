@@ -128,7 +128,7 @@ const ClubDetailCard = ({ club }:any) => {
         {clubItems
   .filter(item => String(item.id) === String(club.club_id))
   .map((item, index) => (
-    <div key={index} className="bg-gray-200 rounded-lg h-40 overflow-hidden">
+    <div key={index} className="bg-gray-200 rounded-lg h-52 overflow-hidden">
       <img
         src={item.link}
         alt={`Club Image ${index + 1}`}
