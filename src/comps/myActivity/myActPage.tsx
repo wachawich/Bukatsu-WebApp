@@ -128,7 +128,7 @@ const MyActivityPage: React.FC = () => {
     };
 
     return (
-        <div className="bg-white max-w-4xl mx-auto my-6 px-4 py-10 relative border shadow-xl md:px-20 sm:px-8 sm:rounded-2xl h-full">
+        <div className="bg-white max-w-4xl mx-auto my-6 px-4 py-10 relative border shadow-xl md:px-20 sm:px-8 sm:rounded-2xl h-full overflow-auto">
 
             <h1 className="text-2xl font-bold mb-4">My Activity</h1>
 
