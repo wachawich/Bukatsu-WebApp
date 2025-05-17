@@ -3,7 +3,7 @@ import { ActivityField, getActivity, ActivityTypeField, getActivityType } from '
 import { SubjectField, getSubject } from '@/utils/api/subject';
 import HomepageActivityCard from './homepageActivityCard';
 import SubjectCard from './subjectCard';
-import { getUser } from "@/utils/api/userData"
+import Footer from "@/comps/Footer/Footer";
 
 import { useRouter } from "next/router.js";
 
@@ -210,6 +210,8 @@ function Homepage() {
           <div className="text-center text-gray-500">No matching activities found</div>
         )}
       </section>
+
+      <Footer/>
     </div>
   );
 }
