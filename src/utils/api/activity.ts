@@ -259,3 +259,16 @@ export const updateActivityType = async (input: ActivityTypeField) => {
     return data;
 };
 
+export const getActivityAttendance = async (input: ActivityField) => {
+    const {
+        activity_id = "",
+        approve = ""
+    } = input;
+
+    const data = await fetchDataApi("POST", "activity_attendance.get", {
+        activity_id,
+        approve
+    });
+
+    return data;
+};
