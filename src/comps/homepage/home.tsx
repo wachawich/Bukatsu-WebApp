@@ -3,7 +3,8 @@ import { ActivityField, getActivity, ActivityTypeField, getActivityType } from '
 import { SubjectField, getSubject } from '@/utils/api/subject';
 import HomepageActivityCard from './homepageActivityCard';
 import SubjectCard from './subjectCard';
-import { getUser } from "@/utils/api/userData"
+import { getUser } from "@/utils/api/userData";
+import { IconSearch } from "@tabler/icons-react";
 
 type ExtendedActivityField = ActivityField & {
   activity_type_data?: {
@@ -25,6 +26,7 @@ function Homepage() {
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingTypes, setLoadingTypes] = useState(true);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -41,58 +43,65 @@ function Homepage() {
   }, []);
 
   useEffect(() => {
-  const fetchSubjects = async () => {
-    try {
-      const response = await getSubject({ show: true });
-      setSubjects(response.data);
-    } catch (error) {
-      console.error('Error fetching subjects:', error);
-    } finally {
-      setLoadingSubjects(false);
-    }
-  };
-  fetchSubjects();
+    const fetchSubjects = async () => {
+      try {
+        const response = await getSubject({ show: true });
+        setSubjects(response.data);
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+      } finally {
+        setLoadingSubjects(false);
+      }
+    };
+    fetchSubjects();
   }, []);
 
 
   useEffect(() => {
-  const fetchTypes = async () => {
-    try {
-      const response = await getActivityType({ show: true });
-      setTypes(response.data);
+    const fetchTypes = async () => {
+      try {
+        const response = await getActivityType({ show: true });
+        setTypes(response.data);
 
-    } catch (error) {
-      console.error('Error fetching ActivityTypes:', error);
-    } finally {
-      setLoadingTypes(false);
-    }
-  };
-  fetchTypes();
+      } catch (error) {
+        console.error('Error fetching ActivityTypes:', error);
+      } finally {
+        setLoadingTypes(false);
+      }
+    };
+    fetchTypes();
   }, []);
 
- const filteredActivity = useMemo(() => {
-  const sorted = activity
-    .slice()
-    .sort((a, b) => {
-      const dateA = new Date(a.start_date).getTime();
-      const dateB = new Date(b.start_date).getTime();
-      return dateB - dateA;
-    });
+  const filteredActivity = useMemo(() => {
+    const sorted = activity
+      .slice()
+      .sort((a, b) => {
+        const dateA = new Date(a.start_date).getTime();
+        const dateB = new Date(b.start_date).getTime();
+        return dateB - dateA;
+      });
 
-  return sorted.filter((activity) => {
-    const matchSubject =
-      !filterSubject ||
-      activity.activity_subject_data?.some(
-        (subject) => subject.subject_id === filterSubject
-      );
-    const matchType =
-      !filterType ||
-      activity.activity_type_data?.some(
-        (type) => type.activity_type_id === filterType
-      );
-      return matchSubject && matchType;
+    return sorted.filter((activity) => {
+      const matchSubject =
+        !filterSubject ||
+        activity.activity_subject_data?.some(
+          (subject) => subject.subject_id === filterSubject
+        );
+      const matchType =
+        !filterType ||
+        activity.activity_type_data?.some(
+          (type) => type.activity_type_id === filterType
+        );
+      const matchSearch = searchTerm.trim() === '' ||
+        activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.activity_type_data?.some(type =>
+          type.activity_type_name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+      return matchSubject && matchType && matchSearch;
     });
-  }, [activity, filterSubject, filterType]);
+  }, [activity, filterSubject, filterType, searchTerm]);
+
 
 
   const handleSubjectClick = (subject_id: number) => {
@@ -137,7 +146,7 @@ function Homepage() {
                     ? 'border-2 bg-orange-500 text-white border-orange-500'
                     : 'border-2 text-black border-orange-500 hover:bg-orange-100'}`}
               >
-                 <p className={`transition ${filterSubject === null ? 'font-bold' : 'font-base'}`} >ALL</p>
+                <p className={`transition ${filterSubject === null ? 'font-bold' : 'font-base'}`} >ALL</p>
               </div>
               <div
                 className={`mt-2 transition ${filterSubject === null ? 'text-orange-500 font-semibold' : 'text-orange-500'}`}
@@ -172,7 +181,7 @@ function Homepage() {
                 : 'text-gray-500 border-b-2 border-transparent hover:text-orange-500'
                 }`}
             >
-               All Types
+              All Types
             </button>
 
             {types.map((type) => (
@@ -195,7 +204,19 @@ function Homepage() {
 
 
       <section className="bg-gray-200 py-4 px-10 md:py-10 md:px-12 lg:px-24 space-y-4 h-full">
-         <h2 className="text-xl md:text-2xl font-bold">{filteredTitle}</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl md:text-2xl font-bold">{filteredTitle}</h2>
+          <div className="relative w-64">
+            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search activity..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 border border-gray-300 rounded-xl px-3 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
+        </div>
         {loadingActivity ? (
           <div className="text-center text-gray-500">Loading activities...</div>
         ) : filteredActivity.length > 0 ? (
