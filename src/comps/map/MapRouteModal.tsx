@@ -14,6 +14,8 @@ export default function MapRouteModal({ open, onClose, onSubmit }: MapRouteModal
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [mode, setMode] = useState("route"); // 'route' หรือ 'whereami'
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -23,20 +25,30 @@ export default function MapRouteModal({ open, onClose, onSubmit }: MapRouteModal
     }
   }, [open]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    console.log("Hello World")
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "route" && start && end) {
       onSubmit(start, end);
       onClose();
     }
-    // ถ้า mode เป็น 'whereami' สามารถเพิ่ม logic ได้ที่นี่
+
   };
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
-      <div className="bg-white rounded-3xl p-8 min-w-[350px] shadow-2xl relative">
+      <div className="bg-white rounded-3xl p-8 min-w-[350px] min-h-[420px] shadow-2xl relative">
         <h2 className="text-center text-xl font-bold mb-6 text-black">Map Application</h2>
         {/* Dropdown ด้านล่างหัวข้อ */}
         <select
@@ -81,14 +93,44 @@ export default function MapRouteModal({ open, onClose, onSubmit }: MapRouteModal
             </>
           )}
           {mode === "whereami" && (
-            <div className="mb-4 text-center text-lg text-gray-700">แสดงตำแหน่งปัจจุบันของคุณ</div>
+            <div className="mb-4 text-center text-lg text-gray-700">
+              <div className="mb-4 flex flex-col items-center">
+                <label
+                  htmlFor="file-upload"
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl w-96 h-32 cursor-pointer transition
+                    ${file ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-100 hover:border-blue-400 hover:bg-blue-50"}`}
+                >
+                  <span className="text-gray-500 mb-2">
+                    {file ? file.name : "อัพโหลดรูปภาพเพื่อค้นหา"}
+                  </span>
+                  <span className="text-2xl text-blue-400">+</span>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={!file || uploading}
+                  className="mt-4 w-64 bg-blue-500 text-white px-4 py-2 rounded-lg"
+                >
+                  {uploading ? "กำลังอัพโหลด..." : "upload"}
+                </button>
+              </div>
+            </div>
           )}
+          {mode === "route" && (
           <button
             type="submit"
             className="w-full mt-6 py-3 bg-blue-500 text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition"
           >
-            {mode === "route" ? "สร้างเส้นทาง" : "ดูตำแหน่งของฉัน"}
+              สร้างเส้นทาง
           </button>
+          )}
         </form>
         <button
           onClick={onClose}
