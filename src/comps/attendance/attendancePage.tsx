@@ -1,16 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getActivity, getActivityAttendance } from '@/utils/api/activity';
+import { getRole } from '@/utils/api/roleData';  
 import AttendanceCard from './attendanceCard';
+
+type Participant = {
+  user_first_name: string;
+  user_last_name: string;
+  role_id: number;
+  role_name?: string;
+  sex: string;
+  phone: string;
+};
 
 const AttendancePage = () => {
   const router = useRouter();
   const { activity_id } = router.query;
 
   const [activityTitle, setActivityTitle] = useState('');
-  const [participants, setParticipants] = useState([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'joined' | 'applied'>('joined');
+  const [roles, setRoles] = useState<{ [key: number]: string }>({});
+
+  // โหลด role ทั้งหมดมาเก็บใน roles state
+  const fetchRoles = async () => {
+    try {
+      const res = await getRole({});
+      const roleMap: { [key: number]: string } = {};
+      if (res?.data?.length > 0) {
+        res.data.forEach((role: any) => {
+          roleMap[role.role_id] = role.role_name;
+        });
+      }
+      setRoles(roleMap);
+    } catch (err) {
+      console.error('Error loading roles:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   useEffect(() => {
     const fetchActivityData = async () => {
@@ -18,20 +49,26 @@ const AttendancePage = () => {
         return;
       }
 
+      setLoading(true);
+
       try {
         const activityData = await getActivity({ activity_id: Number(router.query.activity_id) });
-
         if (activityData?.data?.length > 0) {
-          setActivityTitle(activityData.data[0]?.title || 'กิจกรรมไม่พบ');
+          setActivityTitle(activityData.data[0]?.title || 'Activity not found');
         }
 
-        const attendanceData = await getActivityAttendance({ 
+        const attendanceData = await getActivityAttendance({
           activity_id: Number(router.query.activity_id),
-          approve: activeTab === 'joined'
+          approve: activeTab === 'joined',
         });
 
         if (attendanceData?.data?.length > 0) {
-          setParticipants(attendanceData.data[0]?.attendance_data || []);
+          const attendanceList = attendanceData.data[0]?.attendance_data || [];
+          const updatedParticipants = attendanceList.map((p: Participant) => ({
+            ...p,
+            role_name: roles[p.role_id] || 'Unknown',
+          }));
+          setParticipants(updatedParticipants);
         } else {
           setParticipants([]);
         }
@@ -43,20 +80,20 @@ const AttendancePage = () => {
     };
 
     fetchActivityData();
-  }, [router.isReady, router.query.activity_id, activeTab]);
+  }, [router.isReady, router.query.activity_id, activeTab, roles]);
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6 text-center">{loading ? 'กำลังโหลด...' : activityTitle}</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">{loading ? 'Loading...' : activityTitle}</h1>
 
       <div className="flex flex-col md:flex-row mb-4">
         <button
           onClick={() => setActiveTab('joined')}
-          className={`w-full md:w-1/2 px-4 py-2 rounded-t-md md:rounded-l-full font-bold text-3sm ${
+          className={`w-full md:w-1/2 px-4 py-2 rounded-t-md md:rounded-l-full font-bold text-sm ${
             activeTab === 'joined' ? 'bg-orange-500 text-white' : 'bg-gray-300'
           }`}
         >
-          ผู้เข้าร่วมกิจกรรม
+          Participants
         </button>
         <button
           onClick={() => setActiveTab('applied')}
@@ -64,24 +101,24 @@ const AttendancePage = () => {
             activeTab === 'applied' ? 'bg-orange-500 text-white' : 'bg-gray-300'
           }`}
         >
-          ผู้สมัครเข้าร่วมกิจกรรม
+          Applicants
         </button>
       </div>
 
       {loading ? (
-        <p className="text-gray-500 text-center">กำลังโหลดข้อมูล...</p>
+        <p className="text-gray-500 text-center">Loading data...</p>
       ) : participants.length === 0 ? (
-        <p className="text-gray-500 text-center">ไม่มีข้อมูลผู้เข้าร่วม</p>
+        <p className="text-gray-500 text-center">No participants found</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead className="bg-orange-100">
               <tr>
-                <th className="p-2 border text-left">ชื่อ</th>
+                <th className="p-2 border text-left">Name</th>
                 <th className="p-2 border text-left">Role</th>
-                <th className="p-2 border text-left">เพศ</th>
-                <th className="p-2 border text-left">เบอร์โทรศัพท์</th>
-                {activeTab === 'applied' && <th className="p-2 border text-left">สถานะ</th>}
+                <th className="p-2 border text-left">Gender</th>
+                <th className="p-2 border text-left">Phone</th>
+                {activeTab === 'applied' && <th className="p-2 border text-left">Status</th>}
               </tr>
             </thead>
             <tbody>
