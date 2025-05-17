@@ -132,6 +132,17 @@ const MyActivityPage: React.FC = () => {
 
             <h1 className="text-2xl font-bold mb-4">My Activity</h1>
 
+            {activeTab === "createActivity" && (
+                <div className="flex justify-end mb-2 mr-1 font-bold">
+                    <button
+                        onClick={goToCreateActivityPage}
+                        className="flex items-center text-black transition text-sm md:text-base"
+                    >
+                        <IconPlus size={18} strokeWidth={4} className="mr-1 mb-1" />
+                        Create Activity
+                    </button>
+                </div>
+            )}
             <div className="flex mb-4 rounded-full overflow-hidden border border-gray-300">
                 <button
                     className={`w-1/2 px-6 py-2 text-xs md:text-base font-medium transition ${activeTab === "myActivity"
@@ -173,14 +184,6 @@ const MyActivityPage: React.FC = () => {
 
             {displayedActivities()}
 
-            {activeTab === "createActivity" && (
-                <button
-                    onClick={goToCreateActivityPage}
-                    className="fixed bottom-6 right-6 bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-blue-600 transition z-50"
-                >
-                    <IconPlus size={28} />
-                </button>
-            )}
 
         </div>
     );
