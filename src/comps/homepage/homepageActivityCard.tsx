@@ -54,7 +54,7 @@ export default function HomepageActivityCard({ activity }: ActivityCardProps) {
                 <div className="mt-auto self-end">
                     <Link href={`/activity_detail?activity_id=${activity.activity_id}`}>
                         <button className="text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded">
-                            ดูเพิ่มเติม
+                            View more
                         </button>
                     </Link>
                 </div>

@@ -72,14 +72,25 @@ function Homepage() {
   fetchTypes();
   }, []);
 
+ const filteredActivity = useMemo(() => {
+  const sorted = activity
+    .slice()
+    .sort((a, b) => {
+      const dateA = new Date(a.start_date).getTime();
+      const dateB = new Date(b.start_date).getTime();
+      return dateB - dateA;
+    });
 
-  const filteredActivity = useMemo(() => {
-    return activity.filter((activity) => {
-      const matchSubject = !filterSubject || activity.activity_subject_data?.some(
-        (subjects) => subjects.subject_id === filterSubject
+  return sorted.filter((activity) => {
+    const matchSubject =
+      !filterSubject ||
+      activity.activity_subject_data?.some(
+        (subject) => subject.subject_id === filterSubject
       );
-      const matchType = !filterType || activity.activity_type_data?.some(
-        (types) => types.activity_type_id === filterType
+    const matchType =
+      !filterType ||
+      activity.activity_type_data?.some(
+        (type) => type.activity_type_id === filterType
       );
       return matchSubject && matchType;
     });
@@ -94,11 +105,28 @@ function Homepage() {
     setFilterType(prev => (prev === type_id ? null : type_id));
   };
 
+  const filteredTitle = useMemo(() => {
+    const subjectName = filterSubject
+      ? subjects.find((s) => s.subject_id === filterSubject)?.subject_name
+      : null;
+
+    const typeName = filterType
+      ? types.find((t) => t.activity_type_id === filterType)?.activity_type_name
+      : null;
+
+    if (subjectName && typeName) return `${typeName} Activity in ${subjectName}`;
+    if (subjectName) return `Activity in ${subjectName}`;
+    if (typeName) return `${typeName} Activity`;
+
+    return 'All Activity';
+  }, [filterSubject, filterType, subjects, types]);
+
+
   return (
     <div className="bg-white min-h-screen">
       <section className="bg-white py-12 px-4 md:px-8 lg:px-16 space-y-12 mx-auto">
         {loadingSubjects ? (
-          <div className="text-center text-gray-500 ">กำลังโหลดหมวดวิชา...</div>
+          <div className="text-center text-gray-500 ">Loading subjects...</div>
         ) : subjects.length > 0 ? (
           <div className="flex justify-center gap-1 md:gap-3 flex-wrap">
             <button
@@ -116,7 +144,7 @@ function Homepage() {
               <div
                 className={`mt-2 transition ${filterSubject === null ? 'text-orange-500 font-semibold' : 'text-orange-500'}`}
               >
-                ทั้งหมด
+                ALL
               </div>
             </button>
 
@@ -130,15 +158,15 @@ function Homepage() {
             ))}
           </div>
         ) : (
-          <div className="text-center text-red-500">ไม่พบข้อมูลหมวดวิชา</div>
+          <div className="text-center text-red-500">No subject data found</div>
         )}
       </section>
 
       <section className="bg-white mb-10 px-4 md:px-8 lg:px-16 space-y-12">
         {loadingTypes ? (
-          <div className="text-center text-gray-500">กำลังโหลดประเภทของกิจกรรม...</div>
+          <div className="text-center text-gray-500">Loading activity types...</div>
         ) : types.length > 0 ? (
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <button
               onClick={() => setFilterType(null)}
               className={`text-sm md:text-base transition-all duration-200 ${filterType === null
@@ -146,7 +174,7 @@ function Homepage() {
                 : 'text-gray-500 border-b-2 border-transparent hover:text-orange-500'
                 }`}
             >
-              กิจกรรมทั้งหมด
+               All Types
             </button>
 
             {types.map((type) => (
@@ -163,15 +191,15 @@ function Homepage() {
             ))}
           </div>
         ) : (
-          <div className="text-center text-red-500">ไม่พบข้อมูลประเภทกิจกรรม</div>
+          <div className="text-center text-red-500">No activity types found</div>
         )}
       </section>
 
 
       <section className="bg-gray-200 py-4 px-10 md:py-10 md:px-12 lg:px-24 space-y-4 h-full">
-        <h2 className="text-xl md:text-2xl font-bold">กิจกรรมทั้งหมด</h2>
+         <h2 className="text-xl md:text-2xl font-bold">{filteredTitle}</h2>
         {loadingActivity ? (
-          <div className="text-center text-gray-500">กำลังโหลดกิจกรรม...</div>
+          <div className="text-center text-gray-500">Loading activities...</div>
         ) : filteredActivity.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredActivity.map((activity: any) => (
@@ -179,7 +207,7 @@ function Homepage() {
             ))}
           </div>
         ) : (
-          <div className="text-center text-gray-500">ไม่มีกิจกรรมที่ตรงกับหมวดวิชานี้</div>
+          <div className="text-center text-gray-500">No matching activities found</div>
         )}
       </section>
     </div>
