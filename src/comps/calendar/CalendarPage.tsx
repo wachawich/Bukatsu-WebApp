@@ -117,7 +117,7 @@ const CalendarPage: React.FC = () => {
 
 
   return (
-    <div className="bg-gray-200 max-w-4xl mx-auto my-6 px-4 py-8 shadow-lg md:px-20 sm:px-8 sm:rounded-2xl">
+    <div className="bg-gray-200 max-w-4xl mx-auto my-6 py-8 shadow-lg md:px-20 sm:px-8 sm:rounded-sm min-h-[93vh]">
       <div className="max-w-full sm:max-w-3xl mx-auto">
         {calendarView === 'month' ? (
           <Calendar

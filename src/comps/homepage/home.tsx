@@ -196,7 +196,7 @@ function Homepage() {
       </section>
 
 
-      <section className="bg-gray-200 py-4 px-10 md:py-10 md:px-12 lg:px-24 space-y-4 h-full">
+      <section className="bg-gray-200 py-4 px-10 md:py-10 md:px-12 lg:px-24 space-y-4 h-full min-h-[50vh]">
          <h2 className="text-xl md:text-2xl font-bold">{filteredTitle}</h2>
         {loadingActivity ? (
           <div className="text-center text-gray-500">Loading activities...</div>

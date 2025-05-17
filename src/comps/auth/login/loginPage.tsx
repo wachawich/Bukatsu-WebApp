@@ -77,28 +77,30 @@ const LoginPage = () => {
         password: password
       };
 
-      // const loginData = await login(loginField);
+      const loginData = await login(loginField);
       // console.log("loginData", loginData);
       // console.log("loginData.token", loginData.token);
       // console.log("loginData.user", loginData.user);
 
-      // if (loginData.success) {
-      //   setUserEmail(loginData.user);
-      //   setToken(loginData.token);
+      if (loginData.success) {
+        setUserEmail(loginData.user);
+        setToken(loginData.token);
 
-      //   const otpData = await sendOTP({ email: loginData.user });
+        const otpData = await sendOTP({ email: loginData.user });
 
-      //   if (otpData.success) {
-      //     showNotification("Send OTP Success", `${otpData.message}`, "success");
-      //     setOtpPage(true);
-      //   } else {
-      //     showNotification("Send OTP Error", `${otpData.message}`, "error");
-      //   }
-      // } else {
-      //   showNotification("Login failed!", `${loginData.message}`, "error");
-      // }
+        if (otpData.success) {
+          showNotification("Send OTP Success", `${otpData.message}`, "success");
+          setOtpPage(true);
+        } else {
+          showNotification("Send OTP Error", `${otpData.message}`, "error");
+          return
+        }
+      } else {
+        showNotification("Login failed!", `${loginData.message}`, "error");
+        return
+      }
 
-      // router.push('/dashboard');
+      router.push('/dashboard');
 
     } catch (error) {
       console.error("Login Error:", error);

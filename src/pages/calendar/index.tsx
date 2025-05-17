@@ -3,6 +3,7 @@ import React from 'react'
 import LayoutShell from "@/comps/layouts/LayoutShell";
 
 import CalendarPage from '@/comps/calendar/CalendarPage';
+import Footer from '@/comps/Footer/Footer';
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -13,7 +14,7 @@ function PageContent() {
     // );
 
     return (
-        <div className="bg-white w-full h-full pt-14">
+        <div className="bg-white w-full h-full pt-10">
             <CalendarPage/>
         </div>
         // <>

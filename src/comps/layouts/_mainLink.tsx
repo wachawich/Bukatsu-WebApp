@@ -230,7 +230,7 @@ export function MainLinks() {
             {isLargerThanSm && (
                 <div className="navCenter flex space-between items-center" style={{ width: "70%" }}>
                     <Links links={data} />
-                    <input
+                    {/* <input
                         type="text"
                         placeholder="Search..."
                         className="search-bar text-xs h-full w-64 text-black relative"
@@ -240,7 +240,7 @@ export function MainLinks() {
                             border: "1px solid #ccc",
                             right: isLargerThanSm ? '-10' : '0'
                         }}
-                    />
+                    /> */}
                 </div>
             )}
 
@@ -249,9 +249,9 @@ export function MainLinks() {
             <div style={{ display: "flex", justifyContent: "center" }} className="text-black flex items-center">
                 {/* profile */}
 
-                {!isLargerThanSm && (
+                {/* {!isLargerThanSm && (
                     <IconSearch className="mr-2 border rounded-md p-1 w-full h-full" />
-                )}
+                )} */}
 
                 {token ? (
                     <div className="flex">
