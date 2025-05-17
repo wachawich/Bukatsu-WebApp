@@ -17,9 +17,9 @@ const AttendanceCard: React.FC<{ participant: Participant; activeTab: 'joined' |
       <td className="p-2 border">{participant.sex}</td>
       <td className="p-2 border">{participant.phone || '-'}</td>
       {activeTab === 'applied' && (
-        <td className="border p-2 space-x-2">
-          <button className="px-3 py-1 bg-green-500 text-white rounded">approved</button>
-          <button className="px-3 py-1 bg-red-500 text-white rounded">rejected</button>
+        <td className="border p-2 space-x-2 text-sm">
+          <button className="px-3 py-1 bg-green-600 text-white rounded">approved</button>
+          <button className="px-3 py-1 bg-red-600 text-white rounded">rejected</button>
         </td>
       )}
     </tr>
