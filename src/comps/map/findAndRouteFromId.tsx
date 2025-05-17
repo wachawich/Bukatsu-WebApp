@@ -1,6 +1,6 @@
 import { getLocation } from "@/utils/api/location";
-import { createStartMarker, createEndMarker } from "./MarkerUtils";
-import { createPedestrianRoute } from "./PedestrianRoute";
+// import { createStartMarker, createEndMarker } from "./MarkerUtils";
+// import { createPedestrianRoute } from "./PedestrianRoute";
 
 interface FindAndRouteParams {
   startId: string | number;
@@ -38,6 +38,20 @@ export async function findAndRouteFromId({
 
   if (!startData || !endData) return;
 
+  // แปลง coordinates เป็น number
+  const startLat = Number(startData.lat);
+  const startLong = Number(startData.long);
+  const endLat = Number(endData.lat);
+  const endLong = Number(endData.long);
+
+  // สร้าง Google Maps URL
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${startLat},${startLong}&destination=${endLat},${endLong}`;
+  
+  // Redirect to Google Maps
+  window.location.href = googleMapsUrl;
+
+  /* 
+  // โค้ดเดิมสำหรับ HERE Maps
   // สร้าง marker
   startRef.current = createStartMarker({
     position: { lat: startData.lat, lng: startData.long },
@@ -61,4 +75,5 @@ export async function findAndRouteFromId({
     end: { lat: endData.lat, lng: endData.long },
     routeObjectsRef,
   });
+  */
 }
