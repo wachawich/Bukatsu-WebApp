@@ -102,20 +102,20 @@ const ActivityDetail: React.FC = () => {
 
     const handleSave = async () => {
     if (!formData) return;
-    try {
-      await updateActivity({ ...formData, activity_id: activity?.activity_id });
-      alert("อัปเดตข้อมูลสำเร็จ");
-      setEditing(false);
-      router.replace(`/activity_detail?activity_id=${activity?.activity_id}`);
-    } catch (err) {
-      console.error("Error updating activity:", err);
-      alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
-    }
+      try {
+        await updateActivity({ ...formData, activity_id: activity?.activity_id });
+        alert("Update successful");
+        setEditing(false);
+        router.replace(`/activity_detail?activity_id=${activity?.activity_id}`);
+      } catch (err) {
+        console.error("Error updating activity:", err);
+        alert("An error occurred while updating the activity");
+      }
   };
 
 
-  if (loading) return <p className="text-center">กำลังโหลดข้อมูล...</p>;
-  if (!activity || !formData) return <p className="text-center text-red-500">ไม่พบกิจกรรม</p>;
+  if (loading) return <p className="text-center">Loading data...</p>;
+  if (!activity || !formData) return <p className="text-center text-red-500">Activity not found</p>;
 
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto ">
@@ -317,7 +317,7 @@ const ActivityDetail: React.FC = () => {
               <div className="flex flex-wrap justify-center items-center gap-4 ">
                 <button className="flex items-center gap-4 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md transition text-lg">
                   <IconCameraPin size={20} />
-                  <a>ค้นหาสถานที่</a>
+                  <a>Find Location</a>
                 </button>
                 {activity.activity_json_form && (
                   <a
@@ -326,7 +326,7 @@ const ActivityDetail: React.FC = () => {
                       isSubmitted ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                     }`}
                   >
-                    {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
+                    {isSubmitted ? "Joined" : "Join Activity"}
                   </a>
                 )}
               </div>
@@ -338,7 +338,7 @@ const ActivityDetail: React.FC = () => {
                   onClick={handleSave}
                   className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
                 >
-                  บันทึกข้อมูล
+                  Save
                 </button>
               </div>
             )}
