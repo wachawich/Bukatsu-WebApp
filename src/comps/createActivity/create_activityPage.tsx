@@ -7,6 +7,7 @@ import { getLocation } from "@/utils/api/location";
 import Testform from "@/comps/testForm/testForm";
 import { FormSchema } from "@/lib/types";
 import ImageUpload from "@/comps/Imageupload/uploadimage";
+import { useRouter } from 'next/router';
 
 interface Subject {
   subject_id: string | number;
@@ -20,7 +21,7 @@ interface Location {
 
 export const getSubjects = async () => {
   try {
-    const data = await getSubject({});
+    const data = await getSubject({ flag_valid: true }); 
     return data.success && data.data ? data.data : [];
   } catch (error) {
     console.error("Error fetching subjects:", error);
@@ -120,7 +121,7 @@ const CreateActivityPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const activityTypeResponse = await getActivityType({});
+        const activityTypeResponse = await getActivityType({flag_valid: true });
         if (activityTypeResponse?.success && activityTypeResponse.data) {
           setActivityTypes(activityTypeResponse.data);
         }
@@ -148,19 +149,18 @@ const CreateActivityPage = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!title) newErrors.title = 'กรุณาระบุชื่อกิจกรรม';
-    if (!startDate) newErrors.startDate = 'กรุณาระบุวันที่เริ่มกิจกรรม';
-    if (!endDate) newErrors.endDate = 'กรุณาระบุวันที่สิ้นสุดกิจกรรม';
-    if (!status) newErrors.status = 'กรุณาระบุสถานะกิจกรรม';
-    if (!locationId) newErrors.locationId = 'กรุณาระบุสถานที่';
-    if (!userCount) newErrors.userCount = 'กรุณาระบุจำนวนผู้เข้าร่วม';
+    if (!title) newErrors.title = 'Please enter the activity name';
+    if (!startDate) newErrors.startDate = 'Please enter the start date';
+    if (!endDate) newErrors.endDate = 'Please enter the end date';
+    if (!locationId) newErrors.locationId = 'Please select a location';
+    if (!userCount) newErrors.userCount = 'Please enter the number of participants';
 
     if (!imageJson || (!imageJson.square && !imageJson.banner)) {
-        newErrors.image = 'กรุณาอัปโหลดรูปภาพ';
+        newErrors.image = 'Please upload an image';
     }
     
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-      newErrors.endDate = 'วันที่สิ้นสุดต้องมาหลังวันที่เริ่มกิจกรรม';
+      newErrors.endDate = 'End date must be after the start date';
     }
 
     setErrors(newErrors);
@@ -173,7 +173,6 @@ const CreateActivityPage = () => {
     setDescription('');
     setStartDate('');
     setEndDate('');
-    setStatus('active');
     setContact('');
     setUserCount('');
     setPrice('');
@@ -196,8 +195,8 @@ const CreateActivityPage = () => {
     console.log('Form submission attempted');
 
     if (!userSysId) {
-      setSubmitError('ไม่สามารถดึงข้อมูลผู้ใช้งานได้ กรุณาเข้าสู่ระบบใหม่');
-      return;
+        setSubmitError('Unable to retrieve user information. Please log in again.');
+        return;
     }
 
     if (validateForm()) {
@@ -215,23 +214,22 @@ const CreateActivityPage = () => {
         if (response?.success) {
           setSubmitSuccess(true);
 
-          // 🔹 บันทึกกิจกรรมลง localStorage
           const storedActivities = JSON.parse(localStorage.getItem("activities") || "[]");
           storedActivities.push(payload);
           localStorage.setItem("activities", JSON.stringify(storedActivities));
 
           resetForm();
-          alert('สร้างกิจกรรมสำเร็จ');
+          alert('Activity created successfully');
 
           router.push("/myac");
         } else {
-          setSubmitError('เกิดข้อผิดพลาดในการสร้างกิจกรรม: ' + (response?.message || 'ไม่ทราบสาเหตุ'));
-          alert('เกิดข้อผิดพลาด: ' + (response?.message || 'ไม่ทราบสาเหตุ'));
+           setSubmitError('Error creating activity: ' + (response?.message || 'Unknown error'));
+  alert('Error occurred: ' + (response?.message || 'Unknown error'));
         }
       } catch (error) {
         console.error('Error creating activity:', error);
-        setSubmitError('เกิดข้อผิดพลาด: ' + (error instanceof Error ? error.message : 'ไม่ทราบสาเหตุ'));
-        alert('เกิดข้อผิดพลาด: ' + (error instanceof Error ? error.message : 'ไม่ทราบสาเหตุ'));
+  setSubmitError('Error occurred: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  alert('Error occurred: ' + (error instanceof Error ? error.message : 'Unknown error'));
       } finally {
         setIsSubmitting(false);
         console.log('Submission process completed');
@@ -265,35 +263,12 @@ const CreateActivityPage = () => {
     setFormJson(newFormJson);
   };
 
-//    const handleImageUpload = (url: string) => {
-//     setImageUrl(url);
-//   };
-
-//   const handleDeleteImage = () => {
-//     setImageUrl(null);
-//   };
-
-//   const handleUploadSuccess = (url: string) => {
-//   console.log("Uploaded file URL:", url);
-  
-// };
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md ">
-      {/* {submitSuccess && (
-        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-          สร้างกิจกรรมสำเร็จแล้ว!
-        </div>
-      )}
       
-      {submitError && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {submitError}
-        </div>
-      )} */}
-
-      <div className="text-3xl font-bold text-center bg-orange-500 text-white shadow-lg w-full px-10 py-8 rounded-tr-lg rounded-tl-lg">
-        <p className="mt-2">Create activity</p>
+      <div className="text-4xl font-bold text-center bg-orange-500 text-white shadow-lg w-full px-10 py-8 rounded-tr-lg rounded-tl-lg">
+        <p className="mt-2">Create Activity</p>
       </div>
       <div className='p-6'>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 max-w-4xl mx-auto px-4 py-6">
@@ -304,27 +279,27 @@ const CreateActivityPage = () => {
 
           <div className='w-full'>
             <label className="block text-sm font-medium text-gray-700 mb-1 ">
-              ชื่อกิจกรรม <span className="text-red-500">*</span>
+              Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={`w-full p-2 border  rounded-md ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="กรอกชื่อกิจกรรม"
+              placeholder="Enter activity name"
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
           
             <div className='mt-8'>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                รายละเอียด
+                Description
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
                 rows={9}
-                placeholder="กรอกรายละเอียดกิจกรรม"
+                placeholder="Enter activity description"
               />
             </div>
           </div>
@@ -332,7 +307,7 @@ const CreateActivityPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              วันที่เริ่มกิจกรรม <span className="text-red-500">*</span>
+              Start Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -345,7 +320,7 @@ const CreateActivityPage = () => {
     
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              วันที่สิ้นสุดกิจกรรม <span className="text-red-500">*</span>
+              End Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -358,7 +333,7 @@ const CreateActivityPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              สถานะ <span className="text-red-500">*</span>
+              สถานะ <span className="text-red-500"></span>
             </label>
             <select
               value={status}
@@ -372,46 +347,31 @@ const CreateActivityPage = () => {
             {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
           </div>
 
-          {/* <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                ผู้สร้างกิจกรรม (ID) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={createBy}
-                onChange={(e) => setCreateBy(e.target.value)}
-                className={`w-full p-2 border rounded-md ${errors.createBy ? 'border-red-500' : 'border-gray-300'}`}
-                placeholder="กรอก ID ผู้สร้าง"
-              />
-              {errors.createBy && <p className="text-red-500 text-xs mt-1">{errors.createBy}</p>}
-            </div>  */}
-
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              ช่องทางการติดต่อ
+              Contact Information
             </label>
             <input
               type="text"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
-              placeholder="เช่น เบอร์โทร, อีเมล"
+              placeholder="e.g.Phone number, Email"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              สถานที่จัดกิจกรรม <span className="text-red-500">*</span>
+              Location <span className="text-red-500">*</span>
             </label>
             <select
               value={locationId}
               onChange={(e) => setLocationId(Number(e.target.value) || '')}
               className={`w-full p-2 border rounded-md ${errors.locationId ? 'border-red-500' : 'border-gray-300'}`}
             >
-              <option value="">เลือกสถานที่</option>
+              <option value="">Select Location</option>
               {loadingLocations ? (
-                <option value="" disabled>กำลังโหลดข้อมูลสถานที่...</option>
+                <option value="" disabled>Loading location data...</option>
               ) : locations.length > 0 ? (
                 locations.map((location) => (
                   <option key={location.location_id} value={location.location_id}>
@@ -419,7 +379,7 @@ const CreateActivityPage = () => {
                   </option>
                 ))
               ) : (
-                <option value="" disabled>ไม่พบข้อมูลสถานที่</option>
+                <option value="" disabled>No location data found</option>
               )}
             </select>
             {errors.locationId && <p className="text-red-500 text-xs mt-1">{errors.locationId}</p>}
@@ -427,55 +387,53 @@ const CreateActivityPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              จำนวนผู้เข้าร่วม <span className="text-red-500">*</span>
+              Number of Participants <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               value={userCount}
               onChange={(e) => setUserCount(Number(e.target.value) || '')}
               className={`w-full p-2 border rounded-md ${errors.userCount ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="กรอกจำนวนผู้เข้าร่วม"
+              placeholder="Enter the number of participants"
             />
             {errors.userCount && <p className="text-red-500 text-xs mt-1">{errors.userCount}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              ราคา (บาท)
+              Price (Baht)
             </label>
             <input
               type="number"
               value={price}
               onChange={(e) => setPrice(Number(e.target.value) || '')}
               className="w-full p-2 border border-gray-300 rounded-md"
-              // placeholder="เช่น 0 หรือ 100"
             />
           </div>
 
           <div >
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              คุณสมบัติผู้เข้าร่วม
+              Participant Requirements
             </label>
             <input
               type="text"
               value={userProperty}
               onChange={(e) => setUserProperty(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
-              placeholder="ระบุคุณสมบัติผู้เข้าร่วมกิจกรรม"
             />
           </div>
 
 
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              หมายเหตุเพิ่มเติม
+              Remark
             </label>
             <textarea
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
               rows={2}
-              placeholder="หมายเหตุอื่น ๆ"
+             
             />
           </div>
 
@@ -485,7 +443,7 @@ const CreateActivityPage = () => {
             onItemChange={handleActivityTypeChange}
             idKey="activity_type_id"
             nameKey="activity_type_name"
-            label="ประเภทกิจกรรม"
+            label="Activity Type"
           />
 
           <CheckboxGroup
@@ -494,14 +452,14 @@ const CreateActivityPage = () => {
             onItemChange={handleSubjectChange}
             idKey="subject_id"
             nameKey="subject_name"
-            label="รายวิชาที่เกี่ยวข้อง"
+            label="Subject"
             isLoading={loadingSubjects}
           />
         </div>
 
       
         <div className="mt-6 mb-6">
-          <h2 className="text-xl font-bold mb-2">แบบฟอร์มกิจกรรม</h2>
+          <h2 className="text-xl font-bold mb-2">Activity Form</h2>
           <div id="dynamic-form-container">
             <Testform formJson={formJson} setFormJson={setFormJson} />
             {errors.formJson && <p className="text-red-500 text-xs mt-1">{errors.formJson}</p>}
@@ -513,9 +471,9 @@ const CreateActivityPage = () => {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`w-full py-2 px-4 text-white rounded-md ${isSubmitting ? 'bg-gray-500' : 'bg-orange-500 hover:bg-orange-700'}`}
+            className={`w-full py-2 px-4 text-white rounded-md text-lg ${isSubmitting ? 'bg-gray-500' : 'bg-orange-500 hover:bg-orange-700'}`}
           >
-            {isSubmitting ? 'กำลังสร้างกิจกรรม...' : 'สร้างกิจกรรม'}
+            {isSubmitting ? 'Creating Activity...' : 'Create Activity'}
           </button>
         </div>
       </div>
