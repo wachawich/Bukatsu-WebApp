@@ -33,12 +33,12 @@ const Recommended: React.FC = () => {
     return () => clearInterval(interval);
   }, [activities.length]);
 
-  if (loading) return <p className="text-center">กำลังโหลดกิจกรรม...</p>;
+  if (loading) return <p className="text-center">Loading activities...</p>;
 
   return (
     <section className="overflow-hidden">
       <div className="flex items-center mb-4">
-        <h2 className="text-3xl mr-4 whitespace-nowrap text-blue-800">กิจกรรมที่เกี่ยวข้อง</h2>
+        <h2 className="text-3xl mr-4 whitespace-nowrap text-blue-800">Related activities</h2>
         <div className="flex-grow h-0.5 bg-blue-200"></div>
       </div>
 
@@ -67,7 +67,7 @@ const Recommended: React.FC = () => {
               <Heart />
             </div>
             <button className="text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded mt-2">
-              ดูเพิ่มเติม
+              View More
             </button>
           </div>
         ))}

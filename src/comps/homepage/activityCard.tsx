@@ -12,8 +12,8 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
   const router = useRouter();
 
   const handleEditClick = () => {
-    router.push(`/edit_activity/${activity.activity_id}`);
-  };
+  router.push(`/activity_detail?activity_id=${activity.activity_id}&edit=true`);
+};
 
   const handleViewDetail = () => {
     router.push(`/activity_detail?activity_id=${activity.activity_id}`);

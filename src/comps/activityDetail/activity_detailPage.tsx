@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getActivity, ActivityField ,updateActivity} from "@/utils/api/activity";
+import { getActivity, ActivityField ,updateActivity,deleteActivity} from "@/utils/api/activity";
 import { fetchDataApi } from "@/utils/callAPI";
 import Image from 'next/image';
 import Heart from "./Heart";
@@ -51,8 +51,6 @@ const ActivityDetail: React.FC = () => {
    const [formData, setFormData] = useState<ActivityField | null>(null);
   const [locations, setLocations] = useState<{ location_id: string; location_name: string }[]>([]);
   const isEditMode = edit === "true";
-  // const [isFormOpen, setIsFormOpen] = useState(false); 
-  // const [isSubmitted, setIsSubmitted] = useState(false);
   
   useEffect(() => {
       if (edit === "true") {
@@ -92,6 +90,23 @@ const ActivityDetail: React.FC = () => {
     fetchActivity();
   }, [activity_id]);
 
+  const handleDelete = async () => {
+    if (!activity?.activity_id) return;
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this activity?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteActivity({ activity_id: activity.activity_id });
+      alert("Activity deleted successfully");
+      router.push("/myac");
+    } catch (err) {
+      console.error("Error deleting activity:", err);
+      alert("An error occurred while deleting the activity");
+    }
+  };
+
+
   useEffect(() => {
       const fetchLocations = async () => {
         const res = await fetchDataApi("POST", "location.get", {});
@@ -104,20 +119,20 @@ const ActivityDetail: React.FC = () => {
 
     const handleSave = async () => {
     if (!formData) return;
-    try {
-      await updateActivity({ ...formData, activity_id: activity?.activity_id });
-      alert("อัปเดตข้อมูลสำเร็จ");
-      setEditing(false);
-      router.replace(`/activity_detail?activity_id=${activity?.activity_id}`);
-    } catch (err) {
-      console.error("Error updating activity:", err);
-      alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
-    }
+      try {
+        await updateActivity({ ...formData, activity_id: activity?.activity_id });
+        alert("Update successful");
+        setEditing(false);
+        router.replace(`/activity_detail?activity_id=${activity?.activity_id}`);
+      } catch (err) {
+        console.error("Error updating activity:", err);
+        alert("An error occurred while updating the activity");
+      }
   };
 
 
-  if (loading) return <p className="text-center">กำลังโหลดข้อมูล...</p>;
-  if (!activity || !formData) return <p className="text-center text-red-500">ไม่พบกิจกรรม</p>;
+  if (loading) return <p className="text-center">Loading data...</p>;
+  if (!activity || !formData) return <p className="text-center text-red-500">Activity not found</p>;
 
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto ">
@@ -160,7 +175,7 @@ const ActivityDetail: React.FC = () => {
             )}
 
           <div >
-           <h1 className=" text-2xl sm:text-4xl font-bold text-blue-900">
+           <h1 className=" text-2xl sm:text-5xl font-bold text-blue-900">
             {editing ? (
               <input
                 type="text"
@@ -211,9 +226,9 @@ const ActivityDetail: React.FC = () => {
 
           <div className="p-6"> 
           <div className="bg-blue-50 border-l-4 border-blue-400 p-8 mb-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold text-blue-800 mb-2">รายละเอียดกิจกรรม</h2>
-            <ul className="list-disc ml-5 space-y-1 text-gray-700">
-              <li>
+            <h2 className="text-2xl font-semibold text-blue-800 mb-2">รายละเอียดกิจกรรม</h2>
+            <ul className="list-disc ml-10 space-y-1 text-gray-700 text-lg">
+              <ul>
                 <strong>จำนวนที่รับ:</strong>{" "}
                 {editing ? (
                   <input
@@ -225,8 +240,8 @@ const ActivityDetail: React.FC = () => {
                 ) : (
                   activity.user_count ?? "ไม่ระบุ"
                 )}
-              </li>
-              <li>
+              </ul>
+              <ul>
                 <strong>ค่าใช้จ่าย:</strong>{" "}
                 {editing ? (
                   <input
@@ -238,8 +253,8 @@ const ActivityDetail: React.FC = () => {
                 ) : (
                   `${activity.price ?? 0} บาท`
                 )}
-              </li>
-              <li>
+              </ul>
+              <ul>
                 <strong>สถานที่:</strong>{" "}
                 {editing ? (
                   <select
@@ -256,8 +271,8 @@ const ActivityDetail: React.FC = () => {
                 ) : (
                   activity.location_name
                 )}
-              </li>
-              <li>
+              </ul>
+              <ul>
                 <strong>ระยะเวลา:</strong>{" "}
                 {editing ? (
                   <div className="flex gap-2">
@@ -278,11 +293,11 @@ const ActivityDetail: React.FC = () => {
                 ) : (
                   `${new Date(activity.start_date).toLocaleDateString("th-TH")} - ${new Date(activity.end_date).toLocaleDateString("th-TH")}`
                 )}
-              </li>
+              </ul>
             </ul>
 
-            <div className="mt-4">
-              <h2 className="text-xl font-semibold text-blue-800 mb-2">หมายเหตุ</h2>
+            <div className="mt-4 ">
+              <h2 className="text-2xl font-semibold text-blue-800 mb-2">หมายเหตุ</h2>
               {editing ? (
                 <textarea
                   value={formData.remark || ""}
@@ -290,56 +305,67 @@ const ActivityDetail: React.FC = () => {
                   className="border p-2 rounded w-full"
                 />
               ) : (
+                <div className="ml-10 text-lg">
                 <p>{activity.remark}</p>
+                </div>
               )}
             </div>
             <div className="mt-4">
-              <h2 className="text-xl font-semibold text-blue-800 mb-2">ติดต่อสอบถาม</h2>
+              <h2 className="text-2xl font-semibold text-blue-800 mb-2">ติดต่อสอบถาม</h2>
               {editing ? (
                 <input
                   type="text"
                   value={formData.contact || ""}
                   onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-                  className="border p-2 rounded w-full"
+                  className="border p-2 rounded w-full ml-10"
                 />
               ) : (
+                <div className="ml-10 text-lg">
                 <p>{activity.contact}</p>
+                </div>
               )}
             </div>
           </div>
           </div>  
 
-<div className="p-6">
+        <div className="p-6">
             <p>location</p>
             {!editing && (
               <div className="flex flex-wrap justify-center items-center gap-4 ">
-                <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md transition">
+                <button className="flex items-center gap-4 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md transition text-lg">
                   <IconCameraPin size={20} />
-                  <a>ค้นหาสถานที่</a>
+                  <a>Find Location</a>
                 </button>
                 {activity.activity_json_form && (
                   <a
                     href={`/activity_register?activity_id=${activity_id}`}
-                    className={`px-4 py-2 rounded-md shadow transition text-white ${
+                    className={`px-4 py-2 rounded-md shadow transition text-white text-lg ${
                       isSubmitted ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                     }`}
                   >
-                    {isSubmitted ? "สมัครเรียบร้อยแล้ว" : "สมัครเข้าร่วมกิจกรรม"}
+                    {isSubmitted ? "Joined" : "Join Activity"}
                   </a>
                 )}
               </div>
             )}
 
             {editing && (
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-4 space-x-4">
                 <button
                   onClick={handleSave}
                   className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
                 >
-                  บันทึกข้อมูล
+                  Save
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700"
+                >
+                  Delete
                 </button>
               </div>
             )}
+
           </div>
 
         </div>
