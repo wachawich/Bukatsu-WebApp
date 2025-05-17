@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getActivity, ActivityField ,updateActivity} from "@/utils/api/activity";
+import { getActivity, ActivityField ,updateActivity,deleteActivity} from "@/utils/api/activity";
 import { fetchDataApi } from "@/utils/callAPI";
 import Image from 'next/image';
 import Heart from "./Heart";
@@ -89,6 +89,23 @@ const ActivityDetail: React.FC = () => {
 
     fetchActivity();
   }, [activity_id]);
+
+  const handleDelete = async () => {
+    if (!activity?.activity_id) return;
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this activity?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteActivity({ activity_id: activity.activity_id });
+      alert("Activity deleted successfully");
+      router.push("/myac");
+    } catch (err) {
+      console.error("Error deleting activity:", err);
+      alert("An error occurred while deleting the activity");
+    }
+  };
+
 
   useEffect(() => {
       const fetchLocations = async () => {
@@ -333,15 +350,22 @@ const ActivityDetail: React.FC = () => {
             )}
 
             {editing && (
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-4 space-x-4">
                 <button
                   onClick={handleSave}
                   className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
                 >
                   Save
                 </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700"
+                >
+                  Delete
+                </button>
               </div>
             )}
+
           </div>
 
         </div>
