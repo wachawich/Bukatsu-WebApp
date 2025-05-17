@@ -101,7 +101,7 @@ const MyActivityPage: React.FC = () => {
         if ((activeTab === "myActivity" && loadingMyActivity) || (activeTab === "createActivity" && loadingCreateActivity)) {
             return (
                 <div className="flex justify-center items-center h-40 text-sm md:text-base text-gray-500">
-                    กำลังโหลดข้อมูล...
+                    Loading data...
                 </div>
             );
         }
@@ -109,7 +109,7 @@ const MyActivityPage: React.FC = () => {
         if (activities.length === 0) {
             return (
                 <div className="flex justify-center items-center h-40 text-sm md:text-base text-gray-500">
-                    ไม่มีข้อมูลกิจกรรมในหมวดนี้
+                    No Activity found in this category.
                 </div>
             );
         }
@@ -140,7 +140,7 @@ const MyActivityPage: React.FC = () => {
                         }`}
                     onClick={() => setActiveTab("myActivity")}
                 >
-                    กิจกรรมที่เข้าร่วม
+                    Participated activity
                 </button>
                 <button
                     className={`w-1/2 px-6 py-2 text-xs md:text-base font-medium transition ${activeTab === "createActivity"
@@ -149,7 +149,7 @@ const MyActivityPage: React.FC = () => {
                         }`}
                     onClick={() => setActiveTab("createActivity")}
                 >
-                    กิจกรรมที่สร้าง
+                    Created activity 
                 </button>
             </div>
 

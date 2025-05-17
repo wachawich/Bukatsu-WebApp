@@ -62,7 +62,7 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
             onClick={handleViewDetail}
             className="text-xs md:text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded"
           >
-            ดูเพิ่มเติม
+            View more
           </button>
             {/* // สำหรับหน้าแก้ไข */}
           {isEditable && (
@@ -70,7 +70,7 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
               onClick={handleEditClick}
               className="text-xs md:text-sm bg-gray-400 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
             >
-              แก้ไข
+              Edit
             </button>
           )}
         </div>
