@@ -15,10 +15,8 @@ function PageContent() {
     // );
 
     return (
-        <div className="bg-[#343434] w-full h-full pt-14 auto-">
-            <div className='mt-6'>
+        <div className="bg-[#ffffff] w-full h-full pt-14 flex justify-center">
             <CreateActivity />
-            </div>
         </div>
         // <>
         //     {canRead && (

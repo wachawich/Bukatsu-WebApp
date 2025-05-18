@@ -48,7 +48,7 @@ useEffect(() => {
     setLoading(true);
 
     try {
-      await updateFav({ user_sys_id: userSysId, activity_id, flag_valid: !isLiked });
+      updateFav({ user_sys_id: userSysId, activity_id, flag_valid: !isLiked });
       setIsLiked(!isLiked);
     } catch (error) {
       console.error("Error updating favorite:", error);

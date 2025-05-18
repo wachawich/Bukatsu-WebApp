@@ -41,6 +41,13 @@ const App = ({
             setHasToken(true);
             setIsRender(true);
         } else if (
+            !token &&
+            (router.pathname === "/auth/login" || router.pathname === "/auth/register")
+        ) {
+            setHasToken(true);
+            setIsRender(true);
+            
+        } else if (
             token &&
             (router.pathname === "/auth/login" || router.pathname === "/auth/register")
         ) {

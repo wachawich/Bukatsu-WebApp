@@ -7,7 +7,7 @@ import { getActivity } from "@/utils/api/activity";
 function PageContent() {
     const router = useRouter();
     const { activity_id } = router.query;
-    const [activity, setActivity] = useState(null);
+    const [activity, setActivity] = useState<any>(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     useEffect(() => {
@@ -22,8 +22,8 @@ function PageContent() {
     if (!activity) return <p>ไม่พบกิจกรรม</p>;
 
     return (
-        <div className="bg-[#343434] w-full min-h-screen pt-14 overflow-auto p-40 mt-8">
-           <div className='bg-white rounded-xl p-10'>
+        <div className="bg-[#ffffff] flex w-full min-h-screen pt-14 overflow-auto p-40 mt-8 justify-center item-center">
+           <div className='bg-white rounded-xl p-10 max-w-[50rem] w-full'>
             {activity && activity.title && (
             <h1 className="text-2xl font-bold text-center mb-6 text-blue-900">{activity.title}</h1>
             )}
