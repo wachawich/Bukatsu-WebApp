@@ -8,6 +8,8 @@ import Footer from "@/comps/Footer/Footer";
 import { useRouter } from "next/router.js";
 import { getUser } from "@/utils/api/userData";
 import { IconSearch } from "@tabler/icons-react";
+import { decodeToken } from "@/utils/auth/jwt";
+import { getActivityAI } from "@/utils/api/AI"
 
 type ExtendedActivityField = ActivityField & {
   activity_type_data?: {
@@ -30,17 +32,43 @@ function Homepage() {
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingTypes, setLoadingTypes] = useState(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [token, setToken] = useState<any>()
+
+  useEffect(() => {
+    const tokens = decodeToken();
+
+    setToken(tokens)
+    // if (token) {
+    //   router.push("/home");
+    // }
+  }, []);
 
   useEffect(() => {
     const fetchActivities = async () => {
-      try {
-        const response = await getActivity({ flag_valid: true });
-        setActivity(response.data);
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-      } finally {
-        setLoadingActivity(false);
+
+      const token = decodeToken();
+
+      if (!token) {
+        try {
+          const response = await getActivity({ flag_valid: true });
+          setActivity(response.data);
+        } catch (error) {
+          console.error('Error fetching activities:', error);
+        } finally {
+          setLoadingActivity(false);
+        }
+      } else if (token) {
+        try {
+          const response = await getActivityAI({ flag_valid: true, user_sys_id: token.user_sys_id, limit: false });
+          console.log("ai")
+          setActivity(response.data);
+        } catch (error) {
+          console.error('Error fetching activities:', error);
+        } finally {
+          setLoadingActivity(false);
+        }
       }
+
     };
     fetchActivities();
   }, []);
@@ -76,34 +104,48 @@ function Homepage() {
   }, []);
 
   const filteredActivity = useMemo(() => {
-    const sorted = activity
-      .slice()
-      .sort((a, b) => {
+    const token = decodeToken();
+
+    let sorted: any[] = activity.slice();
+    
+
+    if (token) {
+      // ถ้ามี token → ให้ sort ตาม rank_score ที่มาจาก backend
+      console.log("ai")
+      sorted.sort((a, b) => (a.rank_score ?? Infinity) - (b.rank_score ?? Infinity));
+    } else {
+      // ถ้าไม่มี token → ให้ sort ตามวันที่เริ่มต้น
+      sorted.sort((a, b) => {
         const dateA = new Date(a.start_date).getTime();
         const dateB = new Date(b.start_date).getTime();
         return dateB - dateA;
       });
+    }
 
     return sorted.filter((activity) => {
       const matchSubject =
         !filterSubject ||
         activity.activity_subject_data?.some(
-          (subject) => subject.subject_id === filterSubject
+          (subject: any) => subject.subject_id === filterSubject
         );
+
       const matchType =
         !filterType ||
         activity.activity_type_data?.some(
-          (type) => type.activity_type_id === filterType
+          (type: any) => type.activity_type_id === filterType
         );
-      const matchSearch = searchTerm.trim() === '' ||
+
+      const matchSearch =
+        searchTerm.trim() === '' ||
         activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.activity_type_data?.some(type =>
+        activity.activity_type_data?.some((type) =>
           type.activity_type_name.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
       return matchSubject && matchType && matchSearch;
     });
-  }, [activity, filterSubject, filterType, searchTerm]);
+  }, [activity, filterSubject, filterType, searchTerm, token]);
+
 
 
 
@@ -233,7 +275,7 @@ function Homepage() {
         )}
       </section>
 
-      <Footer/>
+      <Footer />
     </div>
   );
 }
