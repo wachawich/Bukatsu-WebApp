@@ -5,11 +5,13 @@ import { DynamicForm } from '@/comps/form/form-display/dynamic-form';
 
 interface FormPreviewProps {
   form: FormSchema;
+  user_sys_id: string;     
+  activity_id: string;  
    onSubmitSuccess?: () => void;
 }
 
-const FormPreview = ({ form, onSubmitSuccess }: FormPreviewProps) => {
-  console.log('FormPreview received form:', form); // 👈 เพิ่มตรงนี้
+const FormPreview = ({ form, user_sys_id, activity_id, onSubmitSuccess }: FormPreviewProps) => {
+  console.log('FormPreview received form:', form); 
   const handleSubmit = (data: any) => {
     console.log('Preview form data:', data);
     if (onSubmitSuccess) {
@@ -26,7 +28,12 @@ const FormPreview = ({ form, onSubmitSuccess }: FormPreviewProps) => {
         )}
       </div>
       
-      <DynamicForm form={form} onSubmit={handleSubmit}/>
+      <DynamicForm 
+        form={form} 
+        user_sys_id={user_sys_id} 
+        activity_id={activity_id} 
+        onSubmit={handleSubmit} 
+      />
     </div>
   );
 };

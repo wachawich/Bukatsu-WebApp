@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getActivity, getActivityAttendance } from '@/utils/api/activity';
+import { getActivity, getActivityAttendance,approveActivity  } from '@/utils/api/activity';
 import { getRole } from '@/utils/api/roleData';  
 import AttendanceCard from './attendanceCard';
 
+
 type Participant = {
+  user_sys_id: string;
   user_first_name: string;
   user_last_name: string;
   role_id: number;
@@ -21,9 +23,9 @@ const AttendancePage = () => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'joined' | 'applied'>('joined');
-  const [roles, setRoles] = useState<{ [key: number]: string }>({});
+  const [roles, setRoles] = useState<{ [key: number]: string }>({}); // Ensure roles state exists
 
-  // โหลด role ทั้งหมดมาเก็บใน roles state
+  // Define fetchRoles function
   const fetchRoles = async () => {
     try {
       const res = await getRole({});
@@ -39,53 +41,66 @@ const AttendancePage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchRoles();
-  }, []);
+  // Define fetchActivityData outside useEffect
+  const fetchActivityData = async () => {
+    if (!router.isReady || !router.query.activity_id) {
+      return;
+    }
 
-  useEffect(() => {
-    const fetchActivityData = async () => {
-      if (!router.isReady || !router.query.activity_id) {
-        return;
+    setLoading(true);
+
+    try {
+      const activityData = await getActivity({ activity_id: Number(router.query.activity_id) });
+      if (activityData?.data?.length > 0) {
+        setActivityTitle(activityData.data[0]?.title || 'Activity not found');
       }
 
-      setLoading(true);
+      const attendanceData = await getActivityAttendance({
+        activity_id: Number(router.query.activity_id),
+        approve: activeTab === 'joined',
+      });
 
-      try {
-        const activityData = await getActivity({ activity_id: Number(router.query.activity_id) });
-        if (activityData?.data?.length > 0) {
-          setActivityTitle(activityData.data[0]?.title || 'Activity not found');
-        }
-
-        const attendanceData = await getActivityAttendance({
-          activity_id: Number(router.query.activity_id),
-          approve: activeTab === 'joined',
-        });
-
-        if (attendanceData?.data?.length > 0) {
-          const attendanceList = attendanceData.data[0]?.attendance_data || [];
-          const updatedParticipants = attendanceList.map((p: Participant) => ({
-            ...p,
-            role_name: roles[p.role_id] || 'Unknown',
-          }));
-          setParticipants(updatedParticipants);
-        } else {
-          setParticipants([]);
-        }
-      } catch (error) {
-        console.error('Error fetching activity data:', error);
+      if (attendanceData?.data?.length > 0) {
+        const attendanceList = attendanceData.data[0]?.attendance_data || [];
+        const updatedParticipants = attendanceList.map((p: Participant) => ({
+          ...p,
+          role_name: roles[p.role_id] || 'Unknown',
+        }));
+        setParticipants(updatedParticipants);
+      } else {
+        setParticipants([]);
       }
+    } catch (error) {
+      console.error('Error fetching activity data:', error);
+    }
 
-      setLoading(false);
-    };
+    setLoading(false);
+  };
 
-    fetchActivityData();
+  useEffect(() => {
+    fetchRoles(); // Fetch roles when the component mounts
+    fetchActivityData(); // Fetch activity data
   }, [router.isReady, router.query.activity_id, activeTab, roles]);
+
+  // Fix handleApprove function
+  const handleApprove = async (userSysId: string) => {
+    try {
+      await approveActivity({
+        user_sys_id: userSysId,
+        activity_id: String(activity_id), // Ensure activity_id is converted properly
+        approve: true,
+        flag_valid: true,
+      });
+
+      fetchActivityData(); // Now accessible globally
+    } catch (error) {
+      console.error('Error approving participant:', error);
+    }
+  };
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6 text-center">{loading ? 'Loading...' : activityTitle}</h1>
-
       <div className="flex flex-col md:flex-row mb-4">
         <button
           onClick={() => setActiveTab('joined')}
@@ -123,7 +138,7 @@ const AttendancePage = () => {
             </thead>
             <tbody>
               {participants.map((p, i) => (
-                <AttendanceCard key={i} participant={p} activeTab={activeTab} />
+                <AttendanceCard key={i} participant={p} activeTab={activeTab} onApprove={handleApprove} />
               ))}
             </tbody>
           </table>

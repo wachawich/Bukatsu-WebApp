@@ -3,12 +3,14 @@ import { useRouter } from 'next/router';
 import LayoutShell from "@/comps/layouts/LayoutShell";
 import FormPreview from '@/comps/form/form-builder/form-preview';
 import { getActivity } from "@/utils/api/activity";
+import { decodeToken } from '@/utils/auth/jwt';
 
 function PageContent() {
     const router = useRouter();
     const { activity_id } = router.query;
     const [activity, setActivity] = useState<any>(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
+const userSysId = decodeToken()?.user_sys_id;
 
     useEffect(() => {
         const fetchActivity = async () => {
@@ -30,11 +32,13 @@ function PageContent() {
             
             <FormPreview
                 form={activity.activity_json_form}
+                user_sys_id={userSysId} 
+                activity_id={activity_id as string}
                 onSubmitSuccess={() => {
                     setIsSubmitted(true);  
                     router.push(`/activity_detail?activity_id=${activity_id}&submitted=true`); 
                 }}
-            />
+                />
             </div> 
         </div>
     );

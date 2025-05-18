@@ -8,14 +8,17 @@ import { FormSchema, FormField } from '@/lib/types';
 import { Button } from '@/comps/form/ui/button';
 import { Form } from '@/comps/form/ui/form';
 import { FieldRenderer } from './field-renderer';
+import { joinActivity } from '@/utils/api/activity';
 
 interface DynamicFormProps {
   form: FormSchema;
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit?: (data: Record<string, any>) => void;
   isSubmitting?: boolean;
+  user_sys_id: string;
+  activity_id: string;
 }
 
-export function DynamicForm({ form, onSubmit, isSubmitting = false }: DynamicFormProps) {
+export function DynamicForm({ form, onSubmit, isSubmitting = false, user_sys_id, activity_id }: DynamicFormProps) {
   const [submitted, setSubmitted] = useState(false);
 
   // Dynamically build Zod schema based on form fields
@@ -105,18 +108,32 @@ export function DynamicForm({ form, onSubmit, isSubmitting = false }: DynamicFor
     }, {} as Record<string, any>),
   });
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     const enrichedData = form.fields.map((field) => ({
       id: field.id,
       label: field.label,
       type: field.type,
       value: data[field.id] ?? null,
     }));
-  
-    onSubmit(enrichedData);
-    setSubmitted(true);
+
+    const payload = {
+      user_sys_id,
+      activity_id,
+      approve: false,
+      flag_valid: true,
+      activity_json_form_user: JSON.stringify(enrichedData),
+    };
+
+    console.log("Sending to API:", payload);
+
+    try {
+      await joinActivity(payload);
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Submit failed:", err);
+      alert("Failed to submit form. Please try again.");
+    }
   };
-  
 
   if (submitted) {
     return (
