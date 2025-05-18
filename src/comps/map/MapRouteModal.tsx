@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getLocation } from "@/utils/api/location"; 
+import { sendDataApiAI } from "@/utils/callAPI";
 
 type LocationType = { location_id: string | number; location_name: string };
 
@@ -16,6 +17,9 @@ export default function MapRouteModal({ open, onClose, onSubmit }: MapRouteModal
   const [mode, setMode] = useState("route"); // 'route' หรือ 'whereami'
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<number | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; long: number } | null>(null);
+  const [countdown, setCountdown] = useState(30);
 
   useEffect(() => {
     if (open) {
@@ -25,14 +29,57 @@ export default function MapRouteModal({ open, onClose, onSubmit }: MapRouteModal
     }
   }, [open]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (uploading && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [uploading, countdown]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
+      setUploadStatus(null);
+      setCoordinates(null);
     }
   };
 
   const handleUpload = async () => {
-    console.log("Hello World")
+    if (!file) return;
+
+    setUploading(true);
+    setCountdown(30);
+    setUploadStatus(null);
+    setCoordinates(null);
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await sendDataApiAI('POST', 'location.predict.ai', formData);
+      setUploadStatus(201);
+      setCoordinates({
+        lat: response.lat,
+        long: response.lon
+      });
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadStatus(500);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const openGoogleMaps = () => {
+    if (coordinates) {
+      const url = `https://www.google.com/maps?q=${coordinates.lat},${coordinates.long}`;
+      window.open(url, '_blank');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,7 +88,6 @@ export default function MapRouteModal({ open, onClose, onSubmit }: MapRouteModal
       onSubmit(start, end);
       onClose();
     }
-
   };
 
   if (!open) return null;
@@ -116,10 +162,27 @@ export default function MapRouteModal({ open, onClose, onSubmit }: MapRouteModal
                   type="button"
                   onClick={handleUpload}
                   disabled={!file || uploading}
-                  className="mt-4 w-64 bg-blue-500 text-white px-4 py-2 rounded-lg"
+                  className={`mt-4 w-64 px-4 py-2 rounded-lg ${
+                    uploading 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-blue-500 hover:bg-blue-600'
+                  } text-white`}
                 >
-                  {uploading ? "กำลังอัพโหลด..." : "upload"}
+                  {uploading 
+                    ? `กำลังอัพโหลด... (${countdown}s)` 
+                    : uploadStatus === 201 
+                      ? 'อัพโหลดสำเร็จ' 
+                      : 'อัพโหลด'}
                 </button>
+                {uploadStatus === 201 && coordinates && (
+                  <button
+                    type="button"
+                    onClick={openGoogleMaps}
+                    className="mt-4 w-64 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                  >
+                    เปิด Google Maps
+                  </button>
+                )}
               </div>
             </div>
           )}
