@@ -50,13 +50,13 @@ const LoginPage = () => {
 
   const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
-  // useEffect(() => {
-  //   const token = decodeToken();
+  useEffect(() => {
+    const token = decodeToken();
 
-  //   if (token) {
-  //     router.push("/home");
-  //   }
-  // }, []);
+    if (token) {
+      router.push("/home");
+    }
+  }, []);
 
 
   const handleVerificationComplete = (verified: boolean) => {

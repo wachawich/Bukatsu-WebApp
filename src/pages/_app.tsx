@@ -46,16 +46,8 @@ const App = ({
         ) {
             setHasToken(true);
             setIsRender(true);
-            
-        } else if (
-            token &&
-            (router.pathname === "/auth/login" || router.pathname === "/auth/register")
-        ) {
-            setHasToken(true);
-            setIsRender(true);
 
-            router.push("/home");
-        } else if (
+        }  else if (
             router.pathname === "/home" ||
             router.pathname === "/calendar" ||
             router.pathname === "/map" ||

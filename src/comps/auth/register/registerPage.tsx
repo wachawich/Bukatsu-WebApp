@@ -76,13 +76,13 @@ const RegisterPage = () => {
 
     const { showNotification } = useNotification();
 
-    // useEffect(() => {
-    //     const user = decodeToken();
+    useEffect(() => {
+        const user = decodeToken();
 
-    //     if (user) {
-    //         router.push("/home");
-    //     }
-    // }, []);
+        if (user) {
+            router.push("/home");
+        }
+    }, []);
 
     const optionsGender = [
         { label: "ชาย", value: "male" },
