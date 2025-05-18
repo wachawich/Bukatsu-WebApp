@@ -93,19 +93,23 @@ const LoginPage = () => {
           setOtpPage(true);
         } else {
           showNotification("Send OTP Error", `${otpData.message}`, "error");
+          setLoging(false);
           return
         }
       } else {
         showNotification("Login failed!", `${loginData.message}`, "error");
+        setLoging(false);
         return
       }
 
-      router.push('/dashboard');
+      
 
     } catch (error) {
       console.error("Login Error:", error);
       showNotification("Login Error", "เกิดข้อผิดพลาดระหว่างการเข้าสู่ระบบ", "error");
     } finally {
+      // router.push('/home');
+      setLoging(false);
       //setLoging(false); // ปิด loading ไม่ว่าจะสำเร็จหรือ error
     }
   };
@@ -257,7 +261,7 @@ const LoginPage = () => {
 
 
               {loging ? (
-                <div className='w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
+                <div className='flex w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
                   <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
                   Loging...
                 </div>
