@@ -50,9 +50,9 @@ const Recommended: React.FC = () => {
 
   if (tokens) {
     return (
-      <section className="overflow-hidden">
+      <section className="overflow-hidden mb-24">
         <div className="flex items-center mb-4">
-          <h2 className="text-3xl mr-4 whitespace-nowrap text-blue-800">Related activities</h2>
+          <h2 className="text-xl font-bold mr-4 whitespace-nowrap text-blue-800">Activities you might like</h2>
           <div className="flex-grow h-0.5 bg-blue-200"></div>
         </div>
 

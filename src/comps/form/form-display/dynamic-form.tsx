@@ -138,7 +138,7 @@ export function DynamicForm({ form, onSubmit, isSubmitting = false }: DynamicFor
 
   return (
     <Form {...formMethods}>
-      <form onSubmit={formMethods.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={formMethods.handleSubmit(handleSubmit)} className="space-y-6 flex flex-col">
         {form.fields.map((field) => (
           <FieldRenderer
             key={field.id}

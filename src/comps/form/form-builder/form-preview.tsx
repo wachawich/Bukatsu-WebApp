@@ -26,7 +26,7 @@ const FormPreview = ({ form, onSubmitSuccess }: FormPreviewProps) => {
         )}
       </div>
       
-      <DynamicForm form={form} onSubmit={handleSubmit} />
+      <DynamicForm form={form} onSubmit={handleSubmit}/>
     </div>
   );
 };

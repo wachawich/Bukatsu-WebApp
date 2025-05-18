@@ -65,7 +65,7 @@ const CreateActivityPage = () => {
   const [loadingLocations, setLoadingLocations] = useState(true);
 
   const [formJson, setFormJson] = useState<FormSchema | null>(null);
-  const [imageJson, setImageJson] = useState<{ url: string } | null>(null);
+  const [imageJson, setImageJson] = useState<{ square: string, banner: string } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -86,7 +86,7 @@ const CreateActivityPage = () => {
       subject[index.toString()] = subjectId;
     });
 
-    const payload = {
+    const payload : any = {
       title,
       description: description || '',
       start_date: startDate,
