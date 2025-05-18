@@ -15,6 +15,10 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
     router.push(`/edit_activity/${activity.activity_id}`);
   };
 
+  const handleattendance = () => {
+    router.push(`/activity_detail/attendance?activity_id=${activity.activity_id}`);
+  };
+
   const handleViewDetail = () => {
     router.push(`/activity_detail?activity_id=${activity.activity_id}`);
   };
@@ -66,12 +70,20 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
           </button>
             {/* // สำหรับหน้าแก้ไข */}
           {isEditable && (
+            <div className ="flex gap-2">
+            <button
+              onClick={handleattendance}
+              className="text-xs md:text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
+            >
+              Applicants 
+            </button>
+            
             <button
               onClick={handleEditClick}
               className="text-xs md:text-sm bg-gray-400 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
             >
               Edit
-            </button>
+            </button></div>
           )}
         </div>
       </div>
