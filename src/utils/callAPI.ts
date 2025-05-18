@@ -69,8 +69,6 @@ export async function fetchDataApiAI(method: string, from: string, body: {}, rou
     }
 }
 
-
-
 export async function sendDataApi(method: string, from: string, body: {}): Promise<any> {
     const isFormData = body instanceof FormData;
 
@@ -92,5 +90,54 @@ export async function sendDataApi(method: string, from: string, body: {}): Promi
     } catch (error) {
         console.error('API call failed:', error);
         throw error;
+    }
+}
+
+export async function sendDataApiAI(method: string, from: string, body: FormData): Promise<any> {
+    const urls = "http://127.0.0.1:5000";
+    const fullUrl = `${urls}/${from}`;
+
+    if (!urls) {
+        throw new Error('BACKEND_PATH environment variable is not set');
+    }
+
+    console.log('Attempting to fetch from:', fullUrl);
+    console.log('Request method:', method);
+    console.log('Request body:', body);
+
+    try {
+        const response = await fetch(fullUrl, {
+            method,
+            body: body,
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('Response data:', data);
+        return data.data;
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        
+        console.error('Detailed fetch error:', {
+            message: errorMessage,
+            stack: errorStack,
+            url: fullUrl,
+            method: method
+        });
+        throw new Error(`Failed to fetch: ${errorMessage}`);
     }
 }
