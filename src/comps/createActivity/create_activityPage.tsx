@@ -21,7 +21,7 @@ interface Location {
 
 export const getSubjects = async () => {
   try {
-    const data = await getSubject({});
+    const data = await getSubject({flag_valid: true });
     return data.success && data.data ? data.data : [];
   } catch (error) {
     console.error("Error fetching subjects:", error);
@@ -121,7 +121,7 @@ const CreateActivityPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const activityTypeResponse = await getActivityType({});
+        const activityTypeResponse = await getActivityType({flag_valid: true });
         if (activityTypeResponse?.success && activityTypeResponse.data) {
           setActivityTypes(activityTypeResponse.data);
         }
