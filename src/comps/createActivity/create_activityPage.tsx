@@ -71,7 +71,7 @@ const CreateActivityPage = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-    const router = useRouter();
+  const router = useRouter();
 
   const userSysId = decodeToken()?.user_sys_id;
 
@@ -91,6 +91,7 @@ const CreateActivityPage = () => {
       description: description || '',
       start_date: startDate,
       end_date: endDate,
+      status,
       contact: contact || '',
       user_count: userCount !== '' ? Number(userCount) : 0,
       price: price !== '' ? Number(price) : 0,
