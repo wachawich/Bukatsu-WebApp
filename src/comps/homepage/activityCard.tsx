@@ -1,6 +1,7 @@
 import { ActivityField } from "@/utils/api/activity";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import Heart from "../activityDetail/Heart";
 
 
 interface ActivityCardProps {
@@ -21,13 +22,18 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
 
   return (
     <div className="relative flex border rounded-lg p-4 shadow hover:shadow-lg transition-all bg-white gap-4 w-full h-full min-h-60 max-h-64">
-      <Image
-        src={activity.image_link?.banner || "/default-banner.jpg"}
-        alt="Banner Image"
-        width={1000}
-        height={400}
-        className="w-2/5 object-cover rounded-md"
-      />
+      <div className="relative w-2/5">
+        <Image
+          src={activity.image_link?.banner || "/default-banner.jpg"}
+          alt="Banner Image"
+          width={1000}
+          height={400}
+          className="object-cover rounded-md w-full h-full"
+        />
+        <div className="absolute top-2 right-2 bg-gray-300 rounded-full z-10">
+          <Heart activity_id={activity.activity_id} />
+        </div>
+      </div>
       <div className="flex flex-col justify-between flex-1">
         <div className="m-1">
           <h2 className="text-lg sm:text-xl font-bold">{activity.title}</h2>

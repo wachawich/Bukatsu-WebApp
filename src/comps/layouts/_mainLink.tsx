@@ -8,6 +8,7 @@ import {
     IconCalendar,
     IconAlignJustified,
     IconSearch,
+    IconHeart
 } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
@@ -174,7 +175,11 @@ export function MainLinks() {
         setIsDropdownOpen(false);
         router.push("/profile");
     };
-
+    const handleFav = () => {
+        console.log("Opening favorite...");
+        setIsDropdownOpen(false);
+        router.push("/Fav");
+    };
 
     return (
 
@@ -296,6 +301,14 @@ export function MainLinks() {
                             </button>
 
                             <button
+                                onClick={handleFav}
+                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                            >
+                                <IconHeart size={16} className="mr-2" />
+                                Favorite Activity
+                            </button>
+
+                            <button
                                 onClick={handleSettings}
                                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                             >
@@ -304,6 +317,7 @@ export function MainLinks() {
                             </button>
 
                             <hr className="my-1 border-gray-200" />
+
 
                             <button
                                 onClick={handleLogout}
@@ -328,9 +342,6 @@ export function MainLinks() {
                 </ActionIcon> */}
             </div>
         </div>
-
-
-
 
 
 
