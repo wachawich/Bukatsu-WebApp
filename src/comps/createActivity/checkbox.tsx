@@ -31,7 +31,7 @@ const CheckboxGroup = <T extends Record<string, any>>({
       </label>
 
       {isLoading ? (
-        <span className="text-sm text-gray-500">กำลังโหลดข้อมูล...</span>
+        <span className="text-sm text-gray-500">Loading...</span>
       ) : items.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
           {items.map((item) => {
@@ -58,7 +58,7 @@ const CheckboxGroup = <T extends Record<string, any>>({
           })}
         </div>
       ) : (
-        <span className="text-sm text-gray-500">ไม่พบข้อมูล</span>
+        <span className="text-sm text-gray-500">No data</span>
       )}
     </div>
   );
