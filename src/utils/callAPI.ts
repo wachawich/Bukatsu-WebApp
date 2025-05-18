@@ -10,7 +10,7 @@ interface ApiRequestOptions {
 }
 
 export async function fetchDataApi(method: string, from: string, body: {}, route: string = "api"): Promise<any> {
-    const urls = process.env.BACKEND_PATH || "http://localhost:8080";
+    const urls = process.env.BACKEND_PATH || "https://nwxenosz.org";
 
     if (!urls) {
         throw new Error('BACKEND_PATH environment variable is not set');
@@ -45,7 +45,7 @@ export async function sendDataApi(method: string, from: string, body: {}): Promi
     const isFormData = body instanceof FormData;
 
     try {
-        const response = await fetch(`http://localhost:8080/api/${from}`, {
+        const response = await fetch(`https://nwxenosz.org/api/${from}`, {
             method,
             headers: isFormData ? undefined : { 'Content-Type': 'application/json' },
             body: method !== 'GET' ? (isFormData ? body : JSON.stringify(body)) : undefined,
