@@ -10,11 +10,12 @@ interface OTPInputProps {
     verifyOTP: (params: { email: string; otp: string }) => Promise<{ success: boolean; message?: string }>;
     resendOTP: (params: { email: string }) => Promise<{ success: boolean; message?: string }>;
     token?: any;
+    rememberMe? : any;
 }
 
 
 
-const OTPInput = ({ email, onVerificationComplete, token }: OTPInputProps) => {
+const OTPInput = ({ email, onVerificationComplete, token, rememberMe }: OTPInputProps) => {
     const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
     const [isVerifying, setIsVerifying] = useState<boolean>(false);
     const [isVerified, setIsVerified] = useState<boolean>(false);
@@ -132,7 +133,13 @@ const OTPInput = ({ email, onVerificationComplete, token }: OTPInputProps) => {
             onVerificationComplete(result.success);
 
             if (result.success) {
-                const expiresInDays = 1;
+                let expiresInDays : number
+
+                if (rememberMe){
+                    expiresInDays = 30
+                } else {
+                    expiresInDays = 1
+                }
                 const expiresAt = Date.now() + expiresInDays * 24 * 60 * 60 * 1000; // milliseconds
 
                 const data = {

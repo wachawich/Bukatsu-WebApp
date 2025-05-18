@@ -103,7 +103,7 @@ const LayoutShell = ({ children }: any) => {
                     // flex: 1,
                     //marginLeft: isLargerThanSm ? "100%" : "0px",
                     // padding: "80px 16px 100px", // Adjusted for header and bottom nav
-                    background: "#000000",
+                    background: "#ffffff",
                     height: "100vh",
                     // marginTop: "50px",
                     display: "flex"

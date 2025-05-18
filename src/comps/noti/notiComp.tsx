@@ -39,6 +39,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             borderRadius: "8px",
             zIndex: 999999,
             boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            maxWidth: "30rem"
           }}
         >
           <div style={{ fontWeight: "bold", fontSize: "18px" }}>{notificationProps.title}</div>
