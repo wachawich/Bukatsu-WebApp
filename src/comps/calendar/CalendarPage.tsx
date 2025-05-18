@@ -202,7 +202,7 @@ const CalendarPage: React.FC = () => {
             }`}
           onClick={() => setViewMode('allActivity')}
         >
-          กิจกรรมทั้งหมด
+          All activity
         </button>
         <button
           className={`w-1/2 sm:w-1/2 px-4 py-2 rounded-full font-semibold transition text-sm sm:text-base ${viewMode === 'myActivity'
@@ -211,20 +211,20 @@ const CalendarPage: React.FC = () => {
             }`}
           onClick={() => setViewMode('myActivity')}
         >
-          กิจกรรมที่เข้าร่วม
+          Participated activity 
         </button>
       </div>
 
       <h2 className="text-lg sm:text-xl font-bold mt-6 text-left">
-        {viewMode === 'allActivity' ? 'กิจกรรมทั้งหมด' : 'กิจกรรมที่เข้าร่วม'}
+        {viewMode === 'allActivity' ? "All activity" : "Participated activity"}
       </h2>
 
       <div className="flex justify-center mt-4">
         <div className="w-full space-y-4">
           {loadingAll || loadingMyActivity ? (
-            <p className="text-center text-gray-500">กำลังโหลดข้อมูลกิจกรรม...</p>
+            <p className="text-center text-gray-500">Loading activity data...</p>
           ) : displayedActivities.length === 0 ? (
-            <p className="text-center text-gray-500">ไม่มีข้อมูลกิจกรรมในวันนี้</p>
+            <p className="text-center text-gray-500">You have no activities today. </p>
           ) : (
             displayedActivities.map((activity) => (
               <div key={activity.activity_id}>
