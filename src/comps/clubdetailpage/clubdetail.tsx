@@ -8,10 +8,12 @@ const Clubdetail: React.FC<ClubdetailProps> = ({ clubId }) => {
   const [clubData, setClubData] = useState<ClubItem | null>(null);
 
   useEffect(() => {
+    setLoading(true)
     const fetchClub = async () => {
       try {
         const response = await getClub(clubId);  
         setClubData(response.data[0] as ClubItem);
+        setLoading(false)
       } catch (error) {
         console.error('Error fetching club:', error);
       }

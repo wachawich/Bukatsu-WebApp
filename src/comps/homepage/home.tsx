@@ -26,8 +26,8 @@ function Homepage() {
   const [activity, setActivity] = useState<ExtendedActivityField[]>([]);
   const [subjects, setSubjects] = useState<SubjectField[]>([]);
   const [types, setTypes] = useState<ActivityTypeField[]>([]);
-  const [filterSubject, setFilterSubject] = useState<number | null>(null);
-  const [filterType, setFilterType] = useState<number | null>(null);
+  const [filterSubject, setFilterSubject] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<string | null>(null);
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingTypes, setLoadingTypes] = useState(true);
@@ -107,7 +107,7 @@ function Homepage() {
     const token = decodeToken();
 
     let sorted: any[] = activity.slice();
-    
+
 
     if (token) {
       // ถ้ามี token → ให้ sort ตาม rank_score ที่มาจาก backend
@@ -126,13 +126,13 @@ function Homepage() {
       const matchSubject =
         !filterSubject ||
         activity.activity_subject_data?.some(
-          (subject: any) => subject.subject_id === filterSubject
+          (subject: any) => String(subject.subject_id) === String(filterSubject)
         );
 
       const matchType =
         !filterType ||
         activity.activity_type_data?.some(
-          (type: any) => type.activity_type_id === filterType
+          (type: any) => String(type.activity_type_id) === String(filterType)
         );
 
       const matchSearch =
@@ -150,20 +150,20 @@ function Homepage() {
 
 
   const handleSubjectClick = (subject_id: number) => {
-    setFilterSubject(prev => (prev === subject_id ? null : subject_id));
+    setFilterSubject(prev => (prev === String(subject_id) ? null : String(subject_id)));
   };
 
   const handleTypeClick = (type_id: number) => {
-    setFilterType(prev => (prev === type_id ? null : type_id));
+    setFilterType(prev => (prev === String(type_id) ? null : String(type_id)));
   };
 
   const filteredTitle = useMemo(() => {
     const subjectName = filterSubject
-      ? subjects.find((s) => s.subject_id === filterSubject)?.subject_name
+      ? subjects.find((s) => String(s.subject_id) === filterSubject)?.subject_name
       : null;
 
     const typeName = filterType
-      ? types.find((t) => t.activity_type_id === filterType)?.activity_type_name
+      ? types.find((t) => String(t.activity_type_id) === filterType)?.activity_type_name
       : null;
 
     if (subjectName && typeName) return `${typeName} Activity in ${subjectName}`;
@@ -174,110 +174,118 @@ function Homepage() {
   }, [filterSubject, filterType, subjects, types]);
 
 
-  return (
-    <div className="bg-white min-h-screen">
-      <section className="bg-white py-12 px-4 md:px-8 lg:px-16 space-y-12 mx-auto">
-        {loadingSubjects ? (
-          <div className="text-center text-gray-500 ">Loading subjects...</div>
-        ) : subjects.length > 0 ? (
-          <div className="flex justify-center gap-1 md:gap-3 flex-wrap">
-            <button
-              onClick={() => setFilterSubject(null)}
-              className={`flex flex-col items-center text-center w-20 sm:w-24 md:w-28 text-xs sm:text-sm group`}
-            >
-              <div
-                className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center rounded cursor-pointer overflow-hidden transition
-                ${filterSubject === null
-                    ? 'border-2 bg-orange-500 text-white border-orange-500'
-                    : 'border-2 text-black border-orange-500 hover:bg-orange-100'}`}
-              >
-                <p className={`transition ${filterSubject === null ? 'font-bold' : 'font-base'}`} >ALL</p>
-              </div>
-              <div
-                className={`mt-2 transition ${filterSubject === null ? 'text-orange-500 font-semibold' : 'text-orange-500'}`}
-              >
-                ALL
-              </div>
-            </button>
-
-            {subjects.map((subject) => (
-              <SubjectCard
-                key={subject.subject_id}
-                subject={subject}
-                selected={filterSubject === subject.subject_id}
-                onClick={() => handleSubjectClick(subject.subject_id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center text-red-500">No subject data found</div>
-        )}
-      </section>
-
-      <section className="bg-white mb-10 px-4 md:px-8 lg:px-16 space-y-12">
-        {loadingTypes ? (
-          <div className="text-center text-gray-500">Loading activity types...</div>
-        ) : types.length > 0 ? (
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            <button
-              onClick={() => setFilterType(null)}
-              className={`text-sm md:text-base transition-all duration-200 ${filterType === null
-                ? 'text-orange-500 border-b-2 border-orange-500 font-semibold'
-                : 'text-gray-500 border-b-2 border-transparent hover:text-orange-500'
-                }`}
-            >
-              All Types
-            </button>
-
-            {types.map((type) => (
+  if (!loadingActivity && !loadingSubjects && !loadingTypes) {
+    return (
+      <div className="fadeIn-animation bg-white min-h-screen">
+        <section className="bg-white py-12 px-4 md:px-8 lg:px-16 space-y-12 mx-auto">
+          {loadingSubjects ? (
+            <div className="text-center text-gray-500 ">Loading subjects...</div>
+          ) : subjects.length > 0 ? (
+            <div className="flex justify-center gap-1 md:gap-3 flex-wrap">
               <button
-                key={type.activity_type_id}
-                onClick={() => handleTypeClick(type.activity_type_id)}
-                className={`text-sm md:text-base transition-all duration-200 ${filterType === type.activity_type_id
+                onClick={() => setFilterSubject(null)}
+                className={`flex flex-col items-center text-center w-20 sm:w-24 md:w-28 text-xs sm:text-sm group`}
+              >
+                <div
+                  className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center rounded cursor-pointer overflow-hidden transition
+                ${filterSubject === null
+                      ? 'border-2 bg-orange-500 text-white border-orange-500'
+                      : 'border-2 text-black border-orange-500 hover:bg-orange-100'}`}
+                >
+                  <p className={`transition ${filterSubject === null ? 'font-bold' : 'font-base'}`} >ALL</p>
+                </div>
+                <div
+                  className={`mt-2 transition ${filterSubject === null ? 'text-orange-500 font-semibold' : 'text-orange-500'}`}
+                >
+                  ALL
+                </div>
+              </button>
+
+              {subjects.map((subject) => (
+                <SubjectCard
+                  key={subject.subject_id}
+                  subject={subject}
+                  selected={filterSubject === subject.subject_id}
+                  onClick={() => handleSubjectClick(subject.subject_id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-red-500">No subject data found</div>
+          )}
+        </section>
+
+        <section className="bg-white mb-10 px-4 md:px-8 lg:px-16 space-y-12">
+          {loadingTypes ? (
+            <div className="text-center text-gray-500">Loading activity types...</div>
+          ) : types.length > 0 ? (
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              <button
+                onClick={() => setFilterType(null)}
+                className={`text-sm md:text-base transition-all duration-200 ${filterType === null
                   ? 'text-orange-500 border-b-2 border-orange-500 font-semibold'
                   : 'text-gray-500 border-b-2 border-transparent hover:text-orange-500'
                   }`}
               >
-                {type.activity_type_name}
+                All Types
               </button>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center text-red-500">No activity types found</div>
-        )}
-      </section>
+
+              {types.map((type) => (
+                <button
+                  key={type.activity_type_id}
+                  onClick={() => handleTypeClick(type.activity_type_id)}
+                  className={`text-sm md:text-base transition-all duration-200 ${filterType === type.activity_type_id
+                    ? 'text-orange-500 border-b-2 border-orange-500 font-semibold'
+                    : 'text-gray-500 border-b-2 border-transparent hover:text-orange-500'
+                    }`}
+                >
+                  {type.activity_type_name}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-red-500">No activity types found</div>
+          )}
+        </section>
 
 
-      <section className="bg-gray-200 py-4 px-10 md:py-10 md:px-12 lg:px-24 space-y-4 h-full">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl md:text-2xl font-bold">{filteredTitle}</h2>
-          <div className="relative w-64">
-            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search activity..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 border border-gray-300 rounded-xl px-3 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
-            />
+        <section className="bg-gray-200 py-4 px-10 md:py-10 md:px-12 lg:px-24 space-y-4 h-full">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl md:text-2xl font-bold">{filteredTitle}</h2>
+            <div className="relative w-64">
+              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search activity..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 border border-gray-300 rounded-xl px-3 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+            </div>
           </div>
-        </div>
-        {loadingActivity ? (
-          <div className="text-center text-gray-500">Loading activities...</div>
-        ) : filteredActivity.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {filteredActivity.map((activity: any) => (
-              <HomepageActivityCard key={activity.activity_id} activity={activity} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center text-gray-500">No matching activities found</div>
-        )}
-      </section>
+          {loadingActivity ? (
+            <div className="text-center text-gray-500">Loading activities...</div>
+          ) : filteredActivity.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {filteredActivity.map((activity: any) => (
+                <HomepageActivityCard key={activity.activity_id} activity={activity} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-gray-500">No matching activities found</div>
+          )}
+        </section>
 
-      <Footer />
-    </div>
-  );
+        <Footer />
+      </div>
+    );
+  } else {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
 }
 
 export default Homepage;

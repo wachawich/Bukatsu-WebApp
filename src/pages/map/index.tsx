@@ -15,7 +15,7 @@ function PageContent() {
     // );
 
     return (
-        <div className="bg-[#343434] w-full h-full pt-14">
+        <div className="bg-[#ffffff] w-full h-full pt-14">
             <MainMap/>
         </div>
         // <>

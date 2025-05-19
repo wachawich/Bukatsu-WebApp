@@ -52,7 +52,8 @@ const App = ({
             router.pathname === "/calendar" ||
             router.pathname === "/map" ||
             router.pathname === "/myactivity" ||
-            (router.pathname === "/activity_detail" && router.query.activity_id)
+            (router.pathname === "/activity_detail" && router.query.activity_id) ||
+            router.pathname === "/resetpassword"
         ) {
             setHasToken(true);
             setIsRender(true);

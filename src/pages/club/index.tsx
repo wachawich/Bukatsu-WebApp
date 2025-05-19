@@ -20,7 +20,6 @@ function PageContent() {
     return (
         <div className="bg-white text-black w-full overflow-x-hidden h-full pt-14">
             <Clubpage/>
-            <Footer/>
         </div>  
         // <>
         //     {canRead && (

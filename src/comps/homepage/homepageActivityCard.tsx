@@ -24,15 +24,18 @@ export default function HomepageActivityCard({ activity }: ActivityCardProps) {
         //   router.push("/home");
         // }
     }, []);
+
     const handleViewDetail = () => {
 
-        updateJsonAI({
-            user_sys_id: token.user_sys_id,
-            section: "click",
-            activity_id: activity.activity_id
-        })
+        if (token) {
+            updateJsonAI({
+                user_sys_id: token.user_sys_id,
+                section: "click",
+                activity_id: activity.activity_id
+            })
 
-        console.log("token.user_sys_id", token.user_sys_id)
+            console.log("token.user_sys_id", token.user_sys_id)
+        }
 
         router.push(`/activity_detail?activity_id=${activity.activity_id}`);
     };

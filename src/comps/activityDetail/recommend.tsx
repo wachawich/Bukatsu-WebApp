@@ -46,7 +46,7 @@ const Recommended: React.FC = () => {
     return () => clearInterval(interval);
   }, [activities.length]);
 
-  if (loading) return <p className="text-center">Loading activities...</p>;
+  if (loading) return <p className="text-center">No Info Please Login!</p>;
 
   if (tokens) {
     return (

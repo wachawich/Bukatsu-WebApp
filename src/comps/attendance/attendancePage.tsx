@@ -77,17 +77,17 @@ const AttendancePage = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchRoles(); // Fetch roles when the component mounts
-    fetchActivityData(); // Fetch activity data
-  }, [router.isReady, router.query.activity_id, activeTab, roles]);
+  // useEffect(() => {
+  //   fetchRoles(); // Fetch roles when the component mounts
+  //   fetchActivityData(); // Fetch activity data
+  // }, [router.isReady, router.query.activity_id, activeTab, roles]);
 
   // Fix handleApprove function
-  const handleApprove = async (userSysId: string) => {
+  const handleApprove = async (userSysId: number) => {
     try {
       await approveActivity({
         user_sys_id: userSysId,
-        activity_id: String(activity_id), // Ensure activity_id is converted properly
+        activity_id: Number(activity_id), // Ensure activity_id is converted properly
         approve: true,
         flag_valid: true,
       });

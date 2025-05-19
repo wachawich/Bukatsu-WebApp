@@ -149,15 +149,15 @@ const RegisterPage = () => {
                 const finalJson: any = await buildJsonForRegis();
                 console.log('finalJson:', finalJson);
 
-                // const registerData = await register(finalJson);
-                // console.log("registerData", registerData);
+                const registerData = await register(finalJson);
+                console.log("registerData", registerData);
 
-                // if (registerData.success) {
-                //     showNotification("Register Success", "สมัครสมาชิกเสร็จสิ้น", "success");
-                //     router.push('/auth/login');
-                // } else {
-                //     showNotification("Register Error", `${registerData.message}`, "error");
-                // }
+                if (registerData.success) {
+                    showNotification("Register Success", "สมัครสมาชิกเสร็จสิ้น", "success");
+                    router.push('/auth/login');
+                } else {
+                    showNotification("Register Error", `${registerData.message}`, "error");
+                }
             } catch (error) {
                 //console.error("Register Error:", error);
                 showNotification("Register Error", "เกิดข้อผิดพลาดระหว่างการสมัคร", "error");

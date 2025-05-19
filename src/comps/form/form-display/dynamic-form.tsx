@@ -10,16 +10,21 @@ import { Form } from '@/comps/form/ui/form';
 import { FieldRenderer } from './field-renderer';
 import { joinActivity } from '@/utils/api/activity';
 
+import { useNotification } from "@/comps/noti/notiComp"
+import { useRouter } from "next/router.js";
+
 interface DynamicFormProps {
   form: FormSchema;
-  onSubmit?: (data: Record<string, any>) => void;
+  onSubmit?: (data: Record<any, any>) => void;
   isSubmitting?: boolean;
-  user_sys_id: string;
-  activity_id: string;
+  user_sys_id: number;
+  activity_id: number;
 }
 
 export function DynamicForm({ form, onSubmit, isSubmitting = false, user_sys_id, activity_id }: DynamicFormProps) {
   const [submitted, setSubmitted] = useState(false);
+  const { showNotification } = useNotification();
+  const router = useRouter();
 
   // Dynamically build Zod schema based on form fields
   const buildFormSchema = (fields: FormField[]) => {
@@ -91,6 +96,7 @@ export function DynamicForm({ form, onSubmit, isSubmitting = false, user_sys_id,
     return z.object(schemaMap);
   };
 
+
   const formSchema = buildFormSchema(form.fields);
   
   // Set up react-hook-form with zod resolver
@@ -127,30 +133,39 @@ export function DynamicForm({ form, onSubmit, isSubmitting = false, user_sys_id,
     console.log("Sending to API:", payload);
 
     try {
-      await joinActivity(payload);
+      const joinAcData = await joinActivity(payload);
+      if (joinAcData.success){
+        showNotification("Success", "Join Activity Success Fully!", 'success')
+        router.reload
+        return
+      }
       setSubmitted(true);
     } catch (err) {
-      console.error("Submit failed:", err);
-      alert("Failed to submit form. Please try again.");
+      //console.error("Submit failed:", err);
+      //alert("Failed to submit form. Please try again.");
+      showNotification("Error", "Failed to submit form. Please try again.!", 'error')
+      return
     }
   };
 
   if (submitted) {
-    return (
-      <div className="py-12 px-8 text-center bg-primary/5 rounded-lg border">
-        <h3 className="text-2xl font-bold text-primary">Response Submitted</h3>
-        <p className="mt-2 text-muted-foreground">Thank you for completing this form.</p>
-        <Button 
-          className="mt-6"
-          onClick={() => {
-            formMethods.reset();
-            setSubmitted(false);
-          }}
-        >
-          Submit Another Response
-        </Button>
-      </div>
-    );
+    <></>
+
+    // return (
+    //   <div className="py-12 px-8 text-center bg-primary/5 rounded-lg border">
+    //     <h3 className="text-2xl font-bold text-primary">Response Submitted</h3>
+    //     <p className="mt-2 text-muted-foreground">Thank you for completing this form.</p>
+    //     <Button 
+    //       className="mt-6"
+    //       onClick={() => {
+    //         formMethods.reset();
+    //         setSubmitted(false);
+    //       }}
+    //     >
+    //       Submit Another Response
+    //     </Button>
+    //   </div>
+    // );
   }
 
   return (

@@ -35,13 +35,15 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
 
   const handleViewDetail = () => {
 
-    updateJsonAI({
-      user_sys_id: token.user_sys_id,
-      section: "click",
-      activity_id: activity.activity_id
-    })
+    if (token) {
+      updateJsonAI({
+        user_sys_id: token.user_sys_id,
+        section: "click",
+        activity_id: activity.activity_id
+      })
 
-    console.log("token.user_sys_id", token.user_sys_id)
+      console.log("token.user_sys_id", token.user_sys_id)
+    }
 
     router.push(`/activity_detail?activity_id=${activity.activity_id}`);
   };
@@ -97,20 +99,20 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
           </button>
           {/* // สำหรับหน้าแก้ไข */}
           {isEditable && (
-            <div className ="flex gap-2">
-            <button
-              onClick={handleattendance}
-              className="text-xs md:text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
-            >
-              Applicants 
-            </button>
-            
-            <button
-              onClick={handleEditClick}
-              className="text-xs md:text-sm bg-gray-400 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
-            >
-              Edit
-            </button></div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleattendance}
+                className="text-xs md:text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
+              >
+                Applicants
+              </button>
+
+              <button
+                onClick={handleEditClick}
+                className="text-xs md:text-sm bg-gray-400 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
+              >
+                Edit
+              </button></div>
           )}
         </div>
       </div>

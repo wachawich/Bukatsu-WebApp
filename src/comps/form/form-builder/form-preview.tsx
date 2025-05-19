@@ -5,8 +5,8 @@ import { DynamicForm } from '@/comps/form/form-display/dynamic-form';
 
 interface FormPreviewProps {
   form: FormSchema;
-  user_sys_id: string;     
-  activity_id: string;  
+  user_sys_id: number;     
+  activity_id: number;  
    onSubmitSuccess?: () => void;
 }
 
