@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState  } from 'react';
 import { getLocation } from "@/utils/api/location"
 import MapRouteModal from "./MapRouteModal"; // ปรับ path ตามจริง
+import LocationPopup from "./LocationPopup";
 import { useRouter } from "next/router";
 import { findAndRouteFromId } from "./findAndRouteFromId";
 // ฟังก์ชันโหลด script แบบเรียงลำดับ
@@ -81,6 +82,7 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
   const startMarkerRef = useRef<any>(null);
   const endMarkerRef = useRef<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const router = useRouter();
   const { start, end } = router.query;
 
@@ -203,10 +205,69 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
 
         console.log("Add center button", buttonContainer);
 
-        // ดึงข้อมูลตำแหน่งจาก API
+        // ดึงข้อมูลตำแหน่งจาก API และสร้าง markers
         const locationData : any = await getLocation({flag_valid: true})
         console.log("locationData", locationData.data)
-        setMarkers(locationData.data);
+        
+        // สร้าง markers สำหรับทุกตำแหน่ง
+        locationData.data.forEach((location: any) => {
+          const marker = new window.H.map.Marker({ 
+            lat: Number(location.lat), 
+            lng: Number(location.long) 
+          });
+          map.addObject(marker);
+
+          let bubble: any = null;
+          let bubbleTimeout: any = null;
+
+          if (location.location_name) {
+            marker.addEventListener('pointerenter', (evt: any) => {
+              if (bubbleTimeout) {
+                clearTimeout(bubbleTimeout);
+                bubbleTimeout = null;
+              }
+              if (bubble) {
+                ui.removeBubble(bubble);
+                bubble = null;
+              }
+              bubble = new window.H.ui.InfoBubble(
+                { lat: Number(location.lat), lng: Number(location.long) },
+                { content: `
+                  <div id="bubble-anim" class="fade-in" style="font-size:16px;font-weight:bold;">
+                    ${location.location_name}
+                    <style>
+                      .fade-in { animation: fadeIn 0.3s; }
+                      .fade-out { animation: fadeOut 0.3s; }
+                      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: none;} }
+                      @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateY(10px);} }
+                    </style>
+                  </div>
+                `}
+              );
+              ui.addBubble(bubble);
+            });
+
+            marker.addEventListener('pointerleave', () => {
+              // ใส่คลาส fade-out ก่อน remove จริง
+              if (bubble) {
+                const bubbleDom = document.querySelector('.H_ib_body #bubble-anim');
+                setTimeout(() => {
+                  if (bubbleDom) {
+                    bubbleDom.classList.remove('fade-in');
+                    bubbleDom.classList.add('fade-out');
+                  }
+                  bubbleTimeout = setTimeout(() => {
+                    if (bubble) {
+                      ui.removeBubble(bubble);
+                      bubble = null;
+                    }
+                    bubbleTimeout = null;
+                  }, 300); // 300ms fadeOut
+                }, 2000); // 2 วิค้างไว้ก่อน fadeOut
+              }
+            });
+          }
+        });
         
         console.log("New center:", map.getCenter());
         map.setCenter({ lat: 13.651287687026441 , lng: 100.494473986665 }, true);
@@ -230,8 +291,7 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
     };
   }, []);
 
-  const handleRouteSubmit = (start, end) => {
-    // ตัวอย่าง: redirect หรือ set state
+  const handleRouteSubmit = (start: string, end: string) => {
     window.location.href = `/map?start=${start}&end=${end}`;
   };
 
@@ -253,6 +313,12 @@ const HereMap: React.FC<HereMapProps> = ({ onShowModal, onLocationSelect }) => {
         onClose={() => setModalOpen(false)}
         onSubmit={handleRouteSubmit}
       />
+      {selectedLocation && (
+        <LocationPopup
+          locationName={selectedLocation}
+          onClose={() => setSelectedLocation(null)}
+        />
+      )}
     </div>
   );
 };

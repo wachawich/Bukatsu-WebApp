@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { IconHeartFilled } from "@tabler/icons-react";
 import { updateFav, getFav } from '@/utils/api/favorite';
 import { decodeToken } from '@/utils/auth/jwt';
+import { updateJsonAI } from "@/utils/api/AI"
 
 interface FavField {
-  user_sys_id: number;
-  activity_id: number;
+  user_sys_id?: number;
+  activity_id?: number;
   flag_valid?: boolean;
 }
 
@@ -25,21 +26,21 @@ function Heart({ activity_id }: FavField) {
     setUserSysId(id);
   }, []);
 
-useEffect(() => {
-  const fetchFavoriteStatus = async () => {
-    if (!userSysId) return;
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      if (!userSysId) return;
 
-    try {
-      const response = await getFav({ user_sys_id: userSysId, activity_id });
-      const result = response?.data?.[0];
-      setIsLiked(!!result && result.flag_valid === true);
-    } catch (error) {
-      console.error("Error fetching favorite status:", error);
-    }
-  };
+      try {
+        const response = await getFav({ user_sys_id: userSysId, activity_id });
+        const result = response?.data?.[0];
+        setIsLiked(!!result && result.flag_valid === true);
+      } catch (error) {
+        console.error("Error fetching favorite status:", error);
+      }
+    };
 
-  fetchFavoriteStatus();
-}, [userSysId, activity_id]);
+    fetchFavoriteStatus();
+  }, [userSysId, activity_id]);
 
 
   const handleClick = async () => {
@@ -49,6 +50,11 @@ useEffect(() => {
 
     try {
       updateFav({ user_sys_id: userSysId, activity_id, flag_valid: !isLiked });
+      updateJsonAI({
+        user_sys_id: userSysId,
+        section: "favorite",
+        activity_id: activity_id
+      })
       setIsLiked(!isLiked);
     } catch (error) {
       console.error("Error updating favorite:", error);

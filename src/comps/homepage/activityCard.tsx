@@ -1,7 +1,10 @@
+import React, { useEffect, useState } from 'react';
 import { ActivityField } from "@/utils/api/activity";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import Heart from "../activityDetail/Heart";
+import { updateJsonAI } from "@/utils/api/AI"
+import { decodeToken } from "@/utils/auth/jwt";
 
 
 interface ActivityCardProps {
@@ -11,12 +14,37 @@ interface ActivityCardProps {
 
 export default function ActivityCard({ activity, isEditable }: ActivityCardProps) {
   const router = useRouter();
+  const [token, setToken] = useState<any>()
+
+  useEffect(() => {
+    const tokens = decodeToken();
+
+    setToken(tokens)
+    // if (token) {
+    //   router.push("/home");
+    // }
+  }, []);
 
   const handleEditClick = () => {
-  router.push(`/activity_detail?activity_id=${activity.activity_id}&edit=true`);
-};
+    router.push(`/activity_detail?activity_id=${activity.activity_id}&edit=true`);
+  };
+
+  const handleattendance = () => {
+    router.push(`/activity_detail/attendance?activity_id=${activity.activity_id}`);
+  };
 
   const handleViewDetail = () => {
+
+    if (token) {
+      updateJsonAI({
+        user_sys_id: token.user_sys_id,
+        section: "click",
+        activity_id: activity.activity_id
+      })
+
+      console.log("token.user_sys_id", token.user_sys_id)
+    }
+
     router.push(`/activity_detail?activity_id=${activity.activity_id}`);
   };
 
@@ -69,14 +97,22 @@ export default function ActivityCard({ activity, isEditable }: ActivityCardProps
           >
             View more
           </button>
-            {/* // สำหรับหน้าแก้ไข */}
+          {/* // สำหรับหน้าแก้ไข */}
           {isEditable && (
-            <button
-              onClick={handleEditClick}
-              className="text-xs md:text-sm bg-gray-400 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
-            >
-              Edit
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleattendance}
+                className="text-xs md:text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
+              >
+                Applicants
+              </button>
+
+              <button
+                onClick={handleEditClick}
+                className="text-xs md:text-sm bg-gray-400 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-1"
+              >
+                Edit
+              </button></div>
           )}
         </div>
       </div>

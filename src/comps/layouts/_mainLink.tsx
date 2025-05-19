@@ -275,18 +275,26 @@ export function MainLinks() {
                         {/* <p className="mt-2 text-sm">{token.username}</p> */}
                     </div>
                 ) : (
-                    <Image
-                        src="/saveee.png"
-                        alt="profile"
-                        width={38}
-                        height={40}
-                        className="border-2 mr-3"
-                        style={{
-                            borderRadius: "50%",
-                            marginLeft: isLargerThanSm ? '10px' : '0'
-                        }}
-                        onClick={toggleDropdown}
-                    />
+                    <div className="flex">
+                        <Image
+                            src="/saveee.png"
+                            alt="profile"
+                            width={38}
+                            height={40}
+                            className="border-2 mr-3"
+                            style={{
+                                borderRadius: "50%",
+                                marginLeft: isLargerThanSm ? '10px' : '0'
+                            }}
+                            onClick={toggleDropdown}
+                        />
+                        <button
+                            className="ml-2 bg-orange-400 hover:bg-orange-500 text-white font-semibold py-1 px-5 rounded-xl shadow transition duration-200"
+                            onClick={() => router.push('/auth/login')}
+                        >
+                            Login
+                        </button>
+                    </div>
                 )}
 
                 {isDropdownOpen && (

@@ -27,10 +27,10 @@ function Clubpage() {
   // }, []);
 
   return (
-    <div>    
+    <div>
       <div className='text-[#ffffff] text-4xl '> kuy</div>
       <ClubPage />
-      </div>
+    </div>
 
   )
 }

@@ -8,15 +8,23 @@ import { FormSchema, FormField } from '@/lib/types';
 import { Button } from '@/comps/form/ui/button';
 import { Form } from '@/comps/form/ui/form';
 import { FieldRenderer } from './field-renderer';
+import { joinActivity } from '@/utils/api/activity';
+
+import { useNotification } from "@/comps/noti/notiComp"
+import { useRouter } from "next/router.js";
 
 interface DynamicFormProps {
   form: FormSchema;
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit?: (data: Record<any, any>) => void;
   isSubmitting?: boolean;
+  user_sys_id: number;
+  activity_id: number;
 }
 
-export function DynamicForm({ form, onSubmit, isSubmitting = false }: DynamicFormProps) {
+export function DynamicForm({ form, onSubmit, isSubmitting = false, user_sys_id, activity_id }: DynamicFormProps) {
   const [submitted, setSubmitted] = useState(false);
+  const { showNotification } = useNotification();
+  const router = useRouter();
 
   // Dynamically build Zod schema based on form fields
   const buildFormSchema = (fields: FormField[]) => {
@@ -88,6 +96,7 @@ export function DynamicForm({ form, onSubmit, isSubmitting = false }: DynamicFor
     return z.object(schemaMap);
   };
 
+
   const formSchema = buildFormSchema(form.fields);
   
   // Set up react-hook-form with zod resolver
@@ -105,40 +114,63 @@ export function DynamicForm({ form, onSubmit, isSubmitting = false }: DynamicFor
     }, {} as Record<string, any>),
   });
 
-  const handleSubmit = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     const enrichedData = form.fields.map((field) => ({
       id: field.id,
       label: field.label,
       type: field.type,
       value: data[field.id] ?? null,
     }));
-  
-    onSubmit(enrichedData);
-    setSubmitted(true);
+
+    const payload = {
+      user_sys_id,
+      activity_id,
+      approve: false,
+      flag_valid: true,
+      activity_json_form_user: JSON.stringify(enrichedData),
+    };
+
+    console.log("Sending to API:", payload);
+
+    try {
+      const joinAcData = await joinActivity(payload);
+      if (joinAcData.success){
+        showNotification("Success", "Join Activity Success Fully!", 'success')
+        router.reload
+        return
+      }
+      setSubmitted(true);
+    } catch (err) {
+      //console.error("Submit failed:", err);
+      //alert("Failed to submit form. Please try again.");
+      showNotification("Error", "Failed to submit form. Please try again.!", 'error')
+      return
+    }
   };
-  
 
   if (submitted) {
-    return (
-      <div className="py-12 px-8 text-center bg-primary/5 rounded-lg border">
-        <h3 className="text-2xl font-bold text-primary">Response Submitted</h3>
-        <p className="mt-2 text-muted-foreground">Thank you for completing this form.</p>
-        <Button 
-          className="mt-6"
-          onClick={() => {
-            formMethods.reset();
-            setSubmitted(false);
-          }}
-        >
-          Submit Another Response
-        </Button>
-      </div>
-    );
+    <></>
+
+    // return (
+    //   <div className="py-12 px-8 text-center bg-primary/5 rounded-lg border">
+    //     <h3 className="text-2xl font-bold text-primary">Response Submitted</h3>
+    //     <p className="mt-2 text-muted-foreground">Thank you for completing this form.</p>
+    //     <Button 
+    //       className="mt-6"
+    //       onClick={() => {
+    //         formMethods.reset();
+    //         setSubmitted(false);
+    //       }}
+    //     >
+    //       Submit Another Response
+    //     </Button>
+    //   </div>
+    // );
   }
 
   return (
     <Form {...formMethods}>
-      <form onSubmit={formMethods.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={formMethods.handleSubmit(handleSubmit)} className="space-y-6 flex flex-col">
         {form.fields.map((field) => (
           <FieldRenderer
             key={field.id}

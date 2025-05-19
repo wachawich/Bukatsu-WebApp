@@ -3,12 +3,42 @@ import { ActivityField } from "@/utils/api/activity";
 import Image from "next/image";
 import Link from "next/link";
 import Heart from "../activityDetail/Heart";
+import { useRouter } from "next/router";
+import { updateJsonAI } from "@/utils/api/AI"
+import { decodeToken } from "@/utils/auth/jwt";
 
 interface ActivityCardProps {
     activity: ActivityField;
 }
 
 export default function HomepageActivityCard({ activity }: ActivityCardProps) {
+
+    const router = useRouter();
+    const [token, setToken] = useState<any>()
+
+    useEffect(() => {
+        const tokens = decodeToken();
+
+        setToken(tokens)
+        // if (token) {
+        //   router.push("/home");
+        // }
+    }, []);
+
+    const handleViewDetail = () => {
+
+        if (token) {
+            updateJsonAI({
+                user_sys_id: token.user_sys_id,
+                section: "click",
+                activity_id: activity.activity_id
+            })
+
+            console.log("token.user_sys_id", token.user_sys_id)
+        }
+
+        router.push(`/activity_detail?activity_id=${activity.activity_id}`);
+    };
 
     return (
 
@@ -52,11 +82,12 @@ export default function HomepageActivityCard({ activity }: ActivityCardProps) {
                 </p>
 
                 <div className="mt-auto self-end">
-                    <Link href={`/activity_detail?activity_id=${activity.activity_id}`}>
-                        <button className="text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded">
-                            View more
-                        </button>
-                    </Link>
+                    <button
+                        onClick={handleViewDetail}
+                        className="text-xs md:text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded"
+                    >
+                        View more
+                    </button>
                 </div>
             </div>
         </div>
