@@ -104,46 +104,49 @@ function Homepage() {
   }, []);
 
   const filteredActivity = useMemo(() => {
-    const token = decodeToken();
+    if (activity) {
+      const token = decodeToken();
 
-    let sorted: any[] = activity.slice();
+      let sorted: any[] = activity.slice();
 
 
-    if (token) {
-      // ถ้ามี token → ให้ sort ตาม rank_score ที่มาจาก backend
-      console.log("ai")
-      sorted.sort((a, b) => (a.rank_score ?? Infinity) - (b.rank_score ?? Infinity));
-    } else {
-      // ถ้าไม่มี token → ให้ sort ตามวันที่เริ่มต้น
-      sorted.sort((a, b) => {
-        const dateA = new Date(a.start_date).getTime();
-        const dateB = new Date(b.start_date).getTime();
-        return dateB - dateA;
+      if (token) {
+        // ถ้ามี token → ให้ sort ตาม rank_score ที่มาจาก backend
+        console.log("ai")
+        sorted.sort((a, b) => (a.rank_score ?? Infinity) - (b.rank_score ?? Infinity));
+      } else {
+        // ถ้าไม่มี token → ให้ sort ตามวันที่เริ่มต้น
+        sorted.sort((a, b) => {
+          const dateA = new Date(a.start_date).getTime();
+          const dateB = new Date(b.start_date).getTime();
+          return dateB - dateA;
+        });
+      }
+
+      return sorted.filter((activity) => {
+        const matchSubject =
+          !filterSubject ||
+          activity.activity_subject_data?.some(
+            (subject: any) => String(subject.subject_id) === String(filterSubject)
+          );
+
+        const matchType =
+          !filterType ||
+          activity.activity_type_data?.some(
+            (type: any) => String(type.activity_type_id) === String(filterType)
+          );
+
+        const matchSearch =
+          searchTerm.trim() === '' ||
+          activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          activity.activity_type_data?.some((type) =>
+            type.activity_type_name.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+
+        return matchSubject && matchType && matchSearch;
       });
     }
 
-    return sorted.filter((activity) => {
-      const matchSubject =
-        !filterSubject ||
-        activity.activity_subject_data?.some(
-          (subject: any) => String(subject.subject_id) === String(filterSubject)
-        );
-
-      const matchType =
-        !filterType ||
-        activity.activity_type_data?.some(
-          (type: any) => String(type.activity_type_id) === String(filterType)
-        );
-
-      const matchSearch =
-        searchTerm.trim() === '' ||
-        activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.activity_type_data?.some((type) =>
-          type.activity_type_name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-      return matchSubject && matchType && matchSearch;
-    });
   }, [activity, filterSubject, filterType, searchTerm, token]);
 
 
